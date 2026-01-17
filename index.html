@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tasks</title>
 
 <style>
 :root{
   --bg:#020617;
-  --panel:rgba(255,255,255,0.04);
+  --panel:rgba(255,255,255,0.05);
   --border:rgba(255,255,255,0.12);
   --text:#e5e7eb;
   --muted:#9ca3af;
@@ -27,20 +27,34 @@
 body{
   margin:0;
   font-family:Inter,system-ui;
-  background:linear-gradient(160deg,#020617,#020617 60%,#020617);
+  background:linear-gradient(160deg,#020617,#020617);
   color:var(--text);
 }
 
-a{color:var(--muted);text-decoration:none;font-weight:500}
+a{
+  color:var(--muted);
+  text-decoration:none;
+  font-weight:500;
+}
 a.active{
   color:var(--text);
   border-bottom:2px solid var(--accent);
   padding-bottom:6px;
 }
 
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(2,6,23,.85);
+  backdrop-filter:blur(12px);
+}
+
 .container{
   max-width:460px;
-  margin:32px auto;
+  margin:28px auto;
   padding:0 16px;
 }
 
@@ -50,7 +64,6 @@ a.active{
   border-radius:18px;
   padding:18px;
   margin-bottom:14px;
-  backdrop-filter:blur(10px);
 }
 
 .task{
@@ -68,12 +81,11 @@ a.active{
 .task-source{font-size:12px;color:var(--muted)}
 
 .done-btn{
-  padding:6px 12px;
+  padding:6px 14px;
   border-radius:999px;
   border:1px solid var(--border);
   background:transparent;
   color:var(--accent);
-  font-size:13px;
   cursor:pointer;
 }
 .done-btn:hover{
@@ -103,15 +115,7 @@ button:hover{color:var(--text)}
 <body>
 
 <!-- NAVBAR -->
-<nav style="
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 18px;
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(to bottom,rgba(2,6,23,.95),rgba(2,6,23,.75));
-  backdrop-filter:blur(12px);
-">
+<nav>
   <div style="display:flex;gap:18px;">
     <a href="index.html" class="active">Tasks</a>
     <a href="habits.html">Habits</a>
@@ -194,7 +198,7 @@ function loadTasks(){
   });
 }
 
-/* ===== SAFE DONE HANDLER ===== */
+/* ===== MARK DONE (WORKER ACTION) ===== */
 function handleDone(btn){
   const source = btn.dataset.source;
   const taskRef = decodeURIComponent(btn.dataset.task);
@@ -206,12 +210,10 @@ function handleDone(btn){
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
-     action: source === "checklist"
-  ? "markChecklistTaskDone"
-  : "markDelegationTaskDone",
-
-      email: USER_EMAIL,
-      taskRef
+      action:"markTaskDone",
+      source:source,
+      email:USER_EMAIL,
+      taskRef:taskRef
     })
   })
   .then(r=>r.json())
@@ -221,7 +223,7 @@ function handleDone(btn){
     }else{
       btn.disabled=false;
       btn.textContent="Done";
-      alert("Failed: " + JSON.stringify(res));
+      alert("Failed: "+JSON.stringify(res));
     }
   })
   .catch(()=>{
