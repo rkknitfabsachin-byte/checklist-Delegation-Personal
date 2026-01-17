@@ -1,67 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tasks</title>
+<title>Proof Upload</title>
 
 <style>
 :root{
   --bg:#020617;--card:#020617;--border:#1f2937;
-  --text:#e5e7eb;--muted:#94a3b8;--accent:#22c55e;
+  --text:#e5e7eb;--muted:#94a3b8;--accent:#2563eb;
 }
 :root[data-theme="light"]{
   --bg:#f8fafc;--card:#ffffff;--border:#e5e7eb;
-  --text:#0f172a;--muted:#475569;--accent:#16a34a;
+  --text:#0f172a;--muted:#475569;--accent:#2563eb;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;font-family:system-ui;
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);}
+.card{border:1px solid var(--border);border-radius:16px;padding:18px;}
+button{cursor:pointer;width:100%;padding:10px;border-radius:10px;
+border:none;background:var(--accent);color:white;font-weight:600;}
+input,select{
+  width:100%;padding:10px;margin-bottom:12px;
   background:var(--bg);color:var(--text);
-}
-a{color:var(--muted);text-decoration:none;font-weight:500}
-a.active{color:var(--text);font-weight:600}
-button{cursor:pointer}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:14px;
+  border:1px solid var(--border);border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
 <nav style="display:flex;justify-content:space-between;align-items:center;
 padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);">
   <div style="display:flex;gap:16px;">
-    <a href="index.html" class="active">Tasks</a>
+    <a href="index.html">Tasks</a>
     <a href="habits.html">Habits</a>
-    <a href="proofs.html">Proofs</a>
+    <a href="proofs.html" class="active">Proofs</a>
   </div>
   <button onclick="toggleTheme()">🌗</button>
 </nav>
 
-<!-- MOTIVATION -->
 <div style="max-width:520px;margin:24px auto;padding:0 16px;">
   <div class="card">
-    <h3 style="margin:0 0 6px;">💡 Daily Focus</h3>
-    <p style="margin:0;color:var(--muted);font-size:14px;">
-      Consistency beats intensity. Just show up today.
+    <h3>Upload Proof 📸</h3>
+    <p style="color:var(--muted);font-size:14px;">
+      Upload image proof for completed work.
     </p>
-  </div>
 
-  <!-- TASKS -->
-  <div id="tasks" class="card" style="text-align:center;color:var(--muted);">
-    Loading tasks…
+    <select id="source">
+      <option value="checklist">Checklist</option>
+      <option value="delegation">Delegation</option>
+      <option value="habit">Habit</option>
+    </select>
+
+    <input id="taskRef" placeholder="Task / Habit name">
+    <input type="file" id="file" accept="image/*" capture="environment">
+
+    <button onclick="upload()">Upload</button>
+
+    <div id="status" style="margin-top:12px;font-size:14px;"></div>
   </div>
 </div>
 
 <script>
-/* === THEME === */
 function applyTheme(){
   document.documentElement.dataset.theme=
     localStorage.getItem("theme")||"dark";
@@ -72,9 +71,35 @@ function toggleTheme(){
 }
 applyTheme();
 
-/* === TASKS (unchanged logic placeholder) === */
-document.getElementById("tasks").innerHTML =
-  "Tasks will appear here based on today 📋";
+const WORKER_URL="https://entirenewwrker.rkknitfabsachin.workers.dev/";
+const USER_EMAIL="rkknitfabsachin@gmail.com";
+
+function upload(){
+  const f=file.files[0];
+  if(!f||!taskRef.value.trim())return alert("Missing data");
+  status.textContent="Uploading…";
+
+  const r=new FileReader();
+  r.onload=()=>{
+    fetch(WORKER_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        action:"saveProof",
+        email:USER_EMAIL,
+        source:source.value,
+        taskRef:taskRef.value.trim(),
+        imageUrl:r.result
+      })
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      status.textContent=res.success?"Uploaded ✅":"Failed ❌";
+      file.value="";taskRef.value="";
+    });
+  };
+  r.readAsDataURL(f);
+}
 </script>
 
 </body>
