@@ -6,7 +6,6 @@
 <title>Tasks</title>
 
 <style>
-/* ===== THEME ===== */
 :root{
   --bg:#020617;
   --panel:rgba(255,255,255,0.04);
@@ -55,24 +54,33 @@ a.active{
 }
 
 .task{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   padding:14px 16px;
   border-radius:14px;
   background:rgba(255,255,255,0.03);
   border:1px solid var(--border);
   margin-bottom:10px;
 }
-.task-title{font-weight:500}
-.task-source{font-size:12px;color:var(--muted);margin-top:4px}
-.empty{text-align:center;color:var(--muted)}
 
-button{
-  background:none;
-  border:none;
-  color:var(--muted);
-  font-size:18px;
+.task-title{font-weight:500}
+.task-source{font-size:12px;color:var(--muted)}
+
+.done-btn{
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--accent);
+  font-size:13px;
   cursor:pointer;
 }
-button:hover{color:var(--text)}
+.done-btn:hover{
+  background:rgba(34,197,94,0.15);
+}
+
+.empty{text-align:center;color:var(--muted)}
 </style>
 </head>
 
@@ -85,11 +93,7 @@ button:hover{color:var(--text)}
   align-items:center;
   padding:14px 18px;
   border-bottom:1px solid var(--border);
-  background:linear-gradient(
-    to bottom,
-    rgba(2,6,23,0.95),
-    rgba(2,6,23,0.75)
-  );
+  background:linear-gradient(to bottom,rgba(2,6,23,.95),rgba(2,6,23,.75));
   backdrop-filter:blur(12px);
 ">
   <div style="display:flex;gap:18px;">
@@ -97,7 +101,7 @@ button:hover{color:var(--text)}
     <a href="habits.html">Habits</a>
     <a href="proofs.html">Proofs</a>
   </div>
-  <button onclick="toggleTheme()">🌗</button>
+  <button onclick="toggleTheme()" style="background:none;border:none;font-size:18px;">🌗</button>
 </nav>
 
 <div class="container">
@@ -105,7 +109,7 @@ button:hover{color:var(--text)}
   <!-- MOTIVATION -->
   <div class="card">
     <div style="font-size:12px;color:var(--accent);font-weight:600;">TODAY</div>
-    <h3 style="margin:6px 0 6px;">Focus on what moves the needle</h3>
+    <h3 style="margin:6px 0;">Focus on what moves the needle</h3>
     <p style="margin:0;color:var(--muted);font-size:14px;">
       Progress is built by showing up daily — even when it feels small.
     </p>
@@ -128,38 +132,64 @@ function toggleTheme(){
 }
 applyTheme();
 
-/* ===== FETCH TASKS ===== */
+/* ===== TASKS ===== */
 const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
 const USER_EMAIL = "rkknitfabsachin@gmail.com";
 
-fetch(WORKER_URL,{
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body:JSON.stringify({
-    action:"getTodayTasks",
-    email:USER_EMAIL
+function loadTasks(){
+  fetch(WORKER_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"getTodayTasks",
+      email:USER_EMAIL
+    })
   })
-})
-.then(r=>r.json())
-.then(res=>{
-  const box=document.getElementById("tasks");
+  .then(r=>r.json())
+  .then(res=>{
+    const box=document.getElementById("tasks");
 
-  if(!res.success || !res.tasks.length){
-    box.innerHTML=`<div class="empty">No tasks for today 🎉</div>`;
-    return;
-  }
+    if(!res.success || !res.tasks.length){
+      box.innerHTML=`<div class="empty">No tasks for today 🎉</div>`;
+      return;
+    }
 
-  box.innerHTML=res.tasks.map(t=>`
-    <div class="task">
-      <div class="task-title">${t.task}</div>
-      <div class="task-source">${t.source}</div>
-    </div>
-  `).join("");
-})
-.catch(()=>{
-  document.getElementById("tasks").innerHTML =
-    `<div class="empty">Failed to load tasks</div>`;
-});
+    box.innerHTML=res.tasks.map((t,i)=>`
+      <div class="task">
+        <div>
+          <div class="task-title">${t.task}</div>
+          <div class="task-source">${t.source}</div>
+        </div>
+        <button class="done-btn"
+          onclick="markDone('${t.source}','${t.task}','${t.planned||""}')">
+          Done
+        </button>
+      </div>
+    `).join("");
+  });
+}
+
+function markDone(source, taskRef, planned){
+  fetch(WORKER_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action: source==="checklist"
+        ? "markChecklistDone"
+        : "markDelegationDone",
+      email: USER_EMAIL,
+      taskRef,
+      planned
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.success) loadTasks();
+    else alert("Failed to mark done");
+  });
+}
+
+loadTasks();
 </script>
 
 </body>
