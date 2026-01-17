@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Habits</title>
 
 <style>
+/* === SAME THEME AS index.html === */
 :root{
   --bg:#020617;
-  --panel:rgba(255,255,255,0.04);
+  --panel:rgba(255,255,255,0.05);
   --border:rgba(255,255,255,0.12);
   --text:#e5e7eb;
   --muted:#9ca3af;
   --accent:#22c55e;
+  --danger:#ef4444;
 }
 :root[data-theme="light"]{
   --bg:#f1f5f9;
@@ -21,18 +23,33 @@
   --text:#0f172a;
   --muted:#475569;
   --accent:#16a34a;
+  --danger:#dc2626;
 }
 
+*{box-sizing:border-box}
 body{
   margin:0;
   font-family:Inter,system-ui;
-  background:var(--bg);
+  background:linear-gradient(160deg,#020617,#020617);
   color:var(--text);
 }
 
+a{color:var(--muted);text-decoration:none;font-weight:500}
+a.active{color:var(--text);border-bottom:2px solid var(--accent);padding-bottom:6px}
+
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(2,6,23,.85);
+  backdrop-filter:blur(12px);
+}
+
 .container{
-  max-width:460px;
-  margin:32px auto;
+  max-width:480px;
+  margin:28px auto;
   padding:0 16px;
 }
 
@@ -40,27 +57,46 @@ body{
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:18px;
-  padding:16px;
-  margin-bottom:12px;
+  padding:18px;
+  margin-bottom:14px;
+}
+
+.habit{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  margin-bottom:10px;
+}
+
+input{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
 }
 
 button{
-  background:none;
   border:none;
+  background:none;
   color:var(--muted);
-  font-size:18px;
   cursor:pointer;
 }
 button:hover{color:var(--text)}
+
+.done{color:var(--accent)}
+.delete{color:var(--danger)}
 </style>
 </head>
 
 <body>
 
-<nav style="display:flex;justify-content:space-between;align-items:center;
-padding:14px 18px;border-bottom:1px solid var(--border);
-background:linear-gradient(to bottom,rgba(2,6,23,.95),rgba(2,6,23,.75));
-backdrop-filter:blur(12px);">
+<nav>
   <div style="display:flex;gap:18px;">
     <a href="index.html">Tasks</a>
     <a href="habits.html" class="active">Habits</a>
@@ -70,64 +106,88 @@ backdrop-filter:blur(12px);">
 </nav>
 
 <div class="container">
-  <h2>Daily Habits</h2>
-  <p style="color:var(--muted);font-size:14px;">
-    Habits reset every day. Complete them once daily.
-  </p>
 
-  <div id="list"></div>
-
-  <div style="display:flex;gap:10px;margin-top:16px;">
-    <input id="input" placeholder="Add a habit…"
-      style="flex:1;padding:12px;border-radius:14px;border:1px solid var(--border);
-      background:var(--panel);color:var(--text);">
-    <button onclick="add()" style="color:var(--accent);font-size:20px;">＋</button>
+  <!-- EXPLANATION -->
+  <div class="card">
+    <h3>Daily Habits</h3>
+    <p style="color:var(--muted);font-size:14px;">
+      These habits reset every day.  
+      Mark them done once per day to build consistency.
+    </p>
   </div>
+
+  <!-- ADD -->
+  <div class="card">
+    <input id="newHabit" placeholder="Add a new habit…" />
+  </div>
+
+  <!-- LIST -->
+  <div id="habits" class="card"></div>
+
 </div>
 
 <script>
+/* THEME */
 function applyTheme(){
   document.documentElement.dataset.theme =
     localStorage.getItem("theme") || "dark";
 }
 function toggleTheme(){
   const t = localStorage.getItem("theme")==="dark"?"light":"dark";
-  localStorage.setItem("theme",t);applyTheme();
+  localStorage.setItem("theme",t);
+  applyTheme();
 }
 applyTheme();
 
-const today=new Date().toISOString().slice(0,10);
-let habits=JSON.parse(localStorage.getItem("habits")||"[]");
+/* LOCAL STORAGE (INTENTIONAL DESIGN) */
+const KEY = "daily_habits";
 
-function save(){localStorage.setItem("habits",JSON.stringify(habits));}
-function render(){
-  list.innerHTML="";
-  habits.forEach((h,i)=>{
-    list.innerHTML+=`
-      <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-        <div>${h.name}</div>
-        <div style="display:flex;gap:10px;">
-          <button onclick="done(${i})">✔</button>
-          <button onclick="edit(${i})">✎</button>
-          <button onclick="del(${i})">🗑</button>
-        </div>
-      </div>`;
-  });
+function loadHabits(){
+  const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+  const box = document.getElementById("habits");
+
+  if(!list.length){
+    box.innerHTML = `<p style="color:var(--muted)">No habits yet</p>`;
+    return;
+  }
+
+  box.innerHTML = list.map((h,i)=>`
+    <div class="habit">
+      <span>${h}</span>
+      <div>
+        <button class="done" onclick="markDone(${i})">✔</button>
+        <button class="delete" onclick="removeHabit(${i})">🗑</button>
+      </div>
+    </div>
+  `).join("");
 }
-function add(){
-  if(!input.value.trim())return;
-  habits.push({name:input.value.trim(),lastDone:null});
-  input.value="";save();render();
+
+function addHabit(){
+  const input = document.getElementById("newHabit");
+  if(!input.value.trim()) return;
+  const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+  list.push(input.value.trim());
+  localStorage.setItem(KEY,JSON.stringify(list));
+  input.value="";
+  loadHabits();
 }
-function done(i){habits[i].lastDone=today;save();render();}
-function edit(i){
-  const v=prompt("Edit habit",habits[i].name);
-  if(v){habits[i].name=v;save();render();}
+
+function removeHabit(i){
+  const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+  list.splice(i,1);
+  localStorage.setItem(KEY,JSON.stringify(list));
+  loadHabits();
 }
-function del(i){
-  if(confirm("Delete habit?")){habits.splice(i,1);save();render();}
+
+function markDone(){
+  alert("Nice. See you tomorrow 👊");
 }
-render();
+
+/* EVENTS */
+document.getElementById("newHabit")
+  .addEventListener("keydown",e=>e.key==="Enter"&&addHabit());
+
+loadHabits();
 </script>
 
 </body>
