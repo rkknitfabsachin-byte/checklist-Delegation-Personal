@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Habits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    nav {
+      display: flex;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid #1f2937;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    nav a.active {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      color: #94a3b8;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+
+    .habit {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    button {
+      background: #22c55e;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.done {
+      background: #064e3b;
+      color: #a7f3d0;
+      cursor: default;
+    }
+
+    .add {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      color: #e5e7eb;
+    }
+
+    .empty {
+      text-align: center;
+      color: #94a3b8;
+      padding: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="index.html">Tasks</a>
+    <a href="habits.html" class="active">Habits</a>
+  </nav>
+
+  <div class="container">
+    <h1>Daily Habits</h1>
+    <div class="sub">Simple habits, done daily 🌱</div>
+
+    <div id="habitList"></div>
+
+    <div class="add">
+      <input id="habitInput" placeholder="Add a habit…" />
+      <button onclick="addHabit()">Add</button>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
+    const USER_EMAIL = "rkknitfabsachin@gmail.com";
+
+    let habits = JSON.parse(localStorage.getItem("habits") || "[]");
+
+    function save() {
+      localStorage.setItem("habits", JSON.stringify(habits));
+    }
+
+    function render() {
+      const box = document.getElementById("habitList");
+      box.innerHTML = "";
+
+      if (habits.length === 0) {
+        box.innerHTML = '<div class="empty">No habits yet ✨</div>';
+        return;
+      }
+
+      habits.forEach((h, i) => {
+        const div = document.createElement("div");
+        div.className = "habit";
+
+        div.innerHTML = `
+          <div>${h.name}</div>
+          <button class="${h.done ? "done" : ""}"
+            onclick="markDone(${i})">
+            ${h.done ? "Done ✓" : "Mark Done"}
+          </button>
+        `;
+
+        box.appendChild(div);
+      });
+    }
+
+    function addHabit() {
+      const input = document.getElementById("habitInput");
+      const name = input.value.trim();
+      if (!name) return;
+
+      habits.push({ name, done: false });
+      input.value = "";
+      save();
+      render();
+    }
+
+    function markDone(i) {
+      if (habits[i].done) return;
+
+      habits[i].done = true;
+      save();
+      render();
+
+      // optional backend sync
+      fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "saveHabit",
+          email: USER_EMAIL,
+          habit: habits[i].name,
+          status: "Done"
+        })
+      }).catch(() => {});
+    }
+
+    render();
+  </script>
+</body>
+</html>
