@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Today’s Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --border: #1f2933;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --checklist: #22c55e;
+      --delegation: #fbbf24;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(180deg, #020617, #020617 60%, #020617);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge.checklist {
+      background: rgba(34,197,94,.15);
+      color: var(--checklist);
+    }
+
+    .badge.delegation {
+      background: rgba(251,191,36,.15);
+      color: var(--delegation);
+    }
+
+    .task {
+      flex: 1;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Today’s Tasks</h1>
+    <div class="sub" id="today"></div>
+
+    <div id="tasks" class="loading">Loading tasks…</div>
+  </div>
+
+<script>
+  const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
+  const USER_EMAIL = "rkknitfabsachin@gmail.com"; // later dynamic
+
+  document.getElementById("today").textContent =
+    new Date().toLocaleDateString(undefined, {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+
+  fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getTodayTasks",
+      email: USER_EMAIL
+    })
+  })
+  .then(r => r.json())
+  .then(renderTasks)
+  .catch(err => {
+    document.getElementById("tasks").innerHTML =
+      "<div class='empty'>Failed to load tasks</div>";
+    console.error(err);
+  });
+
+  function renderTasks(data) {
+    const wrap = document.getElementById("tasks");
+
+    if (!data.success || !data.tasks || data.tasks.length === 0) {
+      wrap.innerHTML = "<div class='empty'>No tasks for today 🎉</div>";
+      return;
+    }
+
+    wrap.innerHTML = "";
+
+    data.tasks.forEach(t => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const badge = document.createElement("div");
+      badge.className = "badge " + t.source;
+      badge.textContent = t.source.toUpperCase();
+
+      const body = document.createElement("div");
+      body.className = "task";
+      body.textContent = t.task;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = new Date(t.planned).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      body.appendChild(date);
+      card.appendChild(badge);
+      card.appendChild(body);
+
+      wrap.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>
