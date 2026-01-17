@@ -1,208 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Habits</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habits</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto;
-      background: #020617;
-      color: #e5e7eb;
-    }
-
-    nav {
-      display: flex;
-      gap: 16px;
-      padding: 14px 18px;
-      border-bottom: 1px solid #1f2937;
-      background: #020617;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: #94a3b8;
-      font-weight: 500;
-    }
-
-    nav a.active {
-      color: #e5e7eb;
-      font-weight: 600;
-    }
-
-    .container {
-      max-width: 520px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-
-    h1 {
-      margin-bottom: 6px;
-    }
-
-    .sub {
-      color: #94a3b8;
-      margin-bottom: 18px;
-      font-size: 14px;
-    }
-
-    .habit {
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    button {
-      background: #22c55e;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    button.done {
-      background: #064e3b;
-      color: #a7f3d0;
-      cursor: default;
-    }
-
-    .add {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    input {
-      flex: 1;
-      padding: 10px;
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 8px;
-      color: #e5e7eb;
-    }
-
-    .empty {
-      text-align: center;
-      color: #94a3b8;
-      padding: 24px;
-    }
-  </style>
+<style>
+:root{
+  --bg:#020617;--card:#020617;--border:#1f2937;
+  --text:#e5e7eb;--muted:#94a3b8;--accent:#22c55e;
+}
+:root[data-theme="light"]{
+  --bg:#f8fafc;--card:#ffffff;--border:#e5e7eb;
+  --text:#0f172a;--muted:#475569;--accent:#16a34a;
+}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);}
+.card{border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+button{cursor:pointer}
+</style>
 </head>
-<nav style="
-  display:flex;
-  gap:18px;
-  padding:14px 18px;
-  border-bottom:1px solid #1f2937;
-  background:#020617;
-  position:sticky;
-  top:0;
-  z-index:10;
-">
-  <a href="index.html" style="color:#94a3b8;text-decoration:none;">Tasks</a>
-  <a href="habits.html" style="color:#94a3b8;text-decoration:none;">Habits</a>
-  <a href="proofs.html" style="color:#e5e7eb;text-decoration:none;font-weight:600;">
-    Proofs
-  </a>
-</nav>
 
 <body>
 
-  <!-- NAVBAR -->
-  <nav>
+<nav style="display:flex;justify-content:space-between;align-items:center;
+padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);">
+  <div style="display:flex;gap:16px;">
     <a href="index.html">Tasks</a>
     <a href="habits.html" class="active">Habits</a>
-  </nav>
-
-  <div class="container">
-    <h1>Daily Habits</h1>
-    <div class="sub">Simple habits, done daily 🌱</div>
-
-    <div id="habitList"></div>
-
-    <div class="add">
-      <input id="habitInput" placeholder="Add a habit…" />
-      <button onclick="addHabit()">Add</button>
-    </div>
+    <a href="proofs.html">Proofs</a>
   </div>
+  <button onclick="toggleTheme()">🌗</button>
+</nav>
 
-  <script>
-    const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
-    const USER_EMAIL = "rkknitfabsachin@gmail.com";
+<div style="max-width:520px;margin:24px auto;padding:0 16px;">
+  <h2>Personal Habits</h2>
+  <p style="color:var(--muted);font-size:14px;">
+    Habits reset daily. Mark them once per day.
+  </p>
 
-    let habits = JSON.parse(localStorage.getItem("habits") || "[]");
+  <div id="list"></div>
 
-    function save() {
-      localStorage.setItem("habits", JSON.stringify(habits));
-    }
+  <div style="display:flex;gap:8px;margin-top:16px;">
+    <input id="input" placeholder="New habit…" style="flex:1;padding:10px;">
+    <button onclick="add()">Add</button>
+  </div>
+</div>
 
-    function render() {
-      const box = document.getElementById("habitList");
-      box.innerHTML = "";
+<script>
+function applyTheme(){
+  document.documentElement.dataset.theme=
+    localStorage.getItem("theme")||"dark";
+}
+function toggleTheme(){
+  const t=localStorage.getItem("theme")==="dark"?"light":"dark";
+  localStorage.setItem("theme",t);applyTheme();
+}
+applyTheme();
 
-      if (habits.length === 0) {
-        box.innerHTML = '<div class="empty">No habits yet ✨</div>';
-        return;
-      }
+const today=new Date().toISOString().slice(0,10);
+let habits=JSON.parse(localStorage.getItem("habits")||"[]");
 
-      habits.forEach((h, i) => {
-        const div = document.createElement("div");
-        div.className = "habit";
+function save(){localStorage.setItem("habits",JSON.stringify(habits));}
+function render(){
+  list.innerHTML="";
+  if(!habits.length){
+    list.innerHTML='<div style="color:var(--muted);text-align:center;">No habits yet</div>';
+    return;
+  }
+  habits.forEach((h,i)=>{
+    const done=h.lastDone===today;
+    list.innerHTML+=`
+      <div class="card" style="display:flex;justify-content:space-between;">
+        <div>${h.name}</div>
+        <div>
+          <button onclick="done(${i})">${done?"✓":"Done"}</button>
+          <button onclick="edit(${i})">✏️</button>
+          <button onclick="del(${i})">🗑️</button>
+        </div>
+      </div>`;
+  });
+}
+function add(){
+  const v=input.value.trim();if(!v)return;
+  habits.push({name:v,lastDone:null});
+  input.value="";save();render();
+}
+function done(i){habits[i].lastDone=today;save();render();}
+function edit(i){
+  const v=prompt("Edit habit",habits[i].name);
+  if(v){habits[i].name=v;save();render();}
+}
+function del(i){
+  if(confirm("Delete habit?")){habits.splice(i,1);save();render();}
+}
+render();
+</script>
 
-        div.innerHTML = `
-          <div>${h.name}</div>
-          <button class="${h.done ? "done" : ""}"
-            onclick="markDone(${i})">
-            ${h.done ? "Done ✓" : "Mark Done"}
-          </button>
-        `;
-
-        box.appendChild(div);
-      });
-    }
-
-    function addHabit() {
-      const input = document.getElementById("habitInput");
-      const name = input.value.trim();
-      if (!name) return;
-
-      habits.push({ name, done: false });
-      input.value = "";
-      save();
-      render();
-    }
-
-    function markDone(i) {
-      if (habits[i].done) return;
-
-      habits[i].done = true;
-      save();
-      render();
-
-      // optional backend sync
-      fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "saveHabit",
-          email: USER_EMAIL,
-          habit: habits[i].name,
-          status: "Done"
-        })
-      }).catch(() => {});
-    }
-
-    render();
-  </script>
 </body>
 </html>
