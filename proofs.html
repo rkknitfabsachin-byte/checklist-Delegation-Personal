@@ -1,197 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Task Proofs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proof Upload</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto;
-      background: #020617;
-      color: #e5e7eb;
-    }
-
-    .container {
-      max-width: 560px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-
-    h1 {
-      margin-bottom: 6px;
-    }
-
-    .sub {
-      color: #94a3b8;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-
-    select, input {
-      width: 100%;
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 8px;
-      padding: 10px;
-      color: #e5e7eb;
-      margin-bottom: 12px;
-    }
-
-    button {
-      background: #2563eb;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      color: #e0e7ff;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .preview {
-      margin-top: 12px;
-    }
-
-    .preview img {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid #1f2937;
-    }
-
-    .status {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #22c55e;
-    }
-  </style>
+<style>
+:root{
+  --bg:#020617;--card:#020617;--border:#1f2937;
+  --text:#e5e7eb;--muted:#94a3b8;--accent:#2563eb;
+}
+:root[data-theme="light"]{
+  --bg:#f8fafc;--card:#ffffff;--border:#e5e7eb;
+  --text:#0f172a;--muted:#475569;--accent:#2563eb;
+}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);}
+.card{border:1px solid var(--border);border-radius:16px;padding:18px;}
+button{cursor:pointer;width:100%;padding:10px;border-radius:10px;
+border:none;background:var(--accent);color:white;font-weight:600;}
+input,select{
+  width:100%;padding:10px;margin-bottom:12px;
+  background:var(--bg);color:var(--text);
+  border:1px solid var(--border);border-radius:10px;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- NAVBAR -->
-  <nav style="
-    display:flex;
-    gap:18px;
-    padding:14px 18px;
-    border-bottom:1px solid #1f2937;
-    background:#020617;
-    position:sticky;
-    top:0;
-    z-index:10;
-  ">
-    <a href="index.html" style="color:#94a3b8;text-decoration:none;">Tasks</a>
-    <a href="habits.html" style="color:#94a3b8;text-decoration:none;">Habits</a>
-    <a href="proofs.html" style="color:#e5e7eb;text-decoration:none;font-weight:600;">
-      Proofs
-    </a>
-  </nav>
-
-  <div class="container">
-    <h1>Upload Proof</h1>
-    <div class="sub">
-      Upload image proof for completed tasks 📸
-    </div>
-
-    <div class="card">
-      <label>Task Source</label>
-      <select id="source">
-        <option value="checklist">Checklist</option>
-        <option value="delegation">Delegation</option>
-        <option value="habit">Habit</option>
-      </select>
-
-      <label>Task / Reference</label>
-      <input id="taskRef" placeholder="Task name or reference" />
-
-      <label>Upload Image</label>
-      <input type="file" id="file" accept="image/*" capture="environment" />
-
-      <button onclick="upload()">Upload Proof</button>
-
-      <div class="preview" id="preview"></div>
-      <div class="status" id="status"></div>
-    </div>
+<nav style="display:flex;justify-content:space-between;align-items:center;
+padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);">
+  <div style="display:flex;gap:16px;">
+    <a href="index.html">Tasks</a>
+    <a href="habits.html">Habits</a>
+    <a href="proofs.html" class="active">Proofs</a>
   </div>
+  <button onclick="toggleTheme()">🌗</button>
+</nav>
 
-  <script>
-    const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
-    const USER_EMAIL = "rkknitfabsachin@gmail.com";
+<div style="max-width:520px;margin:24px auto;padding:0 16px;">
+  <div class="card">
+    <h3>Upload Proof 📸</h3>
+    <p style="color:var(--muted);font-size:14px;">
+      Upload image proof for completed work.
+    </p>
 
-    const fileInput = document.getElementById("file");
-    const preview = document.getElementById("preview");
-    const statusBox = document.getElementById("status");
+    <select id="source">
+      <option value="checklist">Checklist</option>
+      <option value="delegation">Delegation</option>
+      <option value="habit">Habit</option>
+    </select>
 
-    fileInput.onchange = () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+    <input id="taskRef" placeholder="Task / Habit name">
+    <input type="file" id="file" accept="image/*" capture="environment">
 
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      preview.innerHTML = "";
-      preview.appendChild(img);
-    };
+    <button onclick="upload()">Upload</button>
 
-    function upload() {
-      const file = fileInput.files[0];
-      const taskRef = document.getElementById("taskRef").value.trim();
-      const source = document.getElementById("source").value;
+    <div id="status" style="margin-top:12px;font-size:14px;"></div>
+  </div>
+</div>
 
-      if (!file || !taskRef) {
-        alert("Select image and enter task reference");
-        return;
-      }
+<script>
+function applyTheme(){
+  document.documentElement.dataset.theme=
+    localStorage.getItem("theme")||"dark";
+}
+function toggleTheme(){
+  const t=localStorage.getItem("theme")==="dark"?"light":"dark";
+  localStorage.setItem("theme",t);applyTheme();
+}
+applyTheme();
 
-      statusBox.textContent = "Uploading…";
+const WORKER_URL="https://entirenewwrker.rkknitfabsachin.workers.dev/";
+const USER_EMAIL="rkknitfabsachin@gmail.com";
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        fetch(WORKER_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "saveProof",
-            email: USER_EMAIL,
-            source,
-            taskRef,
-            imageUrl: reader.result
-          })
-        })
-          .then(r => r.json())
-          .then(res => {
-            if (res.success) {
-              statusBox.textContent = "Proof uploaded successfully ✅";
-              fileInput.value = "";
-              preview.innerHTML = "";
-            } else {
-              statusBox.textContent = "Upload failed ❌";
-              console.error(res);
-            }
-          })
-          .catch(err => {
-            statusBox.textContent = "Upload error ❌";
-            console.error(err);
-          });
-      };
+function upload(){
+  const f=file.files[0];
+  if(!f||!taskRef.value.trim())return alert("Missing data");
+  status.textContent="Uploading…";
 
-      reader.readAsDataURL(file);
-    }
-  </script>
+  const r=new FileReader();
+  r.onload=()=>{
+    fetch(WORKER_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        action:"saveProof",
+        email:USER_EMAIL,
+        source:source.value,
+        taskRef:taskRef.value.trim(),
+        imageUrl:r.result
+      })
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      status.textContent=res.success?"Uploaded ✅":"Failed ❌";
+      file.value="";taskRef.value="";
+    });
+  };
+  r.readAsDataURL(f);
+}
+</script>
+
 </body>
 </html>
