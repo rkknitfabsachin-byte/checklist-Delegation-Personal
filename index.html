@@ -206,9 +206,10 @@ function handleDone(btn){
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
-      action: source === "checklist"
-        ? "markChecklistDone"
-        : "markDelegationDone",
+     action: source === "checklist"
+  ? "markChecklistTaskDone"
+  : "markDelegationTaskDone",
+
       email: USER_EMAIL,
       taskRef
     })
