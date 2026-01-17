@@ -7,15 +7,36 @@
 
 <style>
 :root{
-  --bg:#020617;--card:#020617;--border:#1f2937;
-  --text:#e5e7eb;--muted:#94a3b8;--accent:#22c55e;
+  --bg:#020617;
+  --panel:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.12);
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#22c55e;
 }
 :root[data-theme="light"]{
-  --bg:#f8fafc;--card:#ffffff;--border:#e5e7eb;
-  --text:#0f172a;--muted:#475569;--accent:#16a34a;
+  --bg:#f1f5f9;
+  --panel:#ffffff;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#475569;
+  --accent:#16a34a;
 }
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);}
-.card{border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+}
 button{cursor:pointer}
 </style>
 </head>
@@ -23,36 +44,36 @@ button{cursor:pointer}
 <body>
 
 <nav style="display:flex;justify-content:space-between;align-items:center;
-padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);">
-  <div style="display:flex;gap:16px;">
+padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(2,6,23,.8);backdrop-filter:blur(12px);">
+  <div style="display:flex;gap:18px;">
     <a href="index.html">Tasks</a>
     <a href="habits.html" class="active">Habits</a>
     <a href="proofs.html">Proofs</a>
   </div>
-  <button onclick="toggleTheme()">🌗</button>
+  <button onclick="toggleTheme()" style="background:none;border:none;font-size:18px;">🌗</button>
 </nav>
 
 <div style="max-width:520px;margin:24px auto;padding:0 16px;">
-  <h2>Personal Habits</h2>
+  <h2>Daily Habits</h2>
   <p style="color:var(--muted);font-size:14px;">
-    Habits reset daily. Mark them once per day.
+    Habits reset every day. Complete them once daily to build discipline.
   </p>
 
   <div id="list"></div>
 
-  <div style="display:flex;gap:8px;margin-top:16px;">
-    <input id="input" placeholder="New habit…" style="flex:1;padding:10px;">
-    <button onclick="add()">Add</button>
+  <div style="display:flex;gap:10px;margin-top:16px;">
+    <input id="input" placeholder="Add a habit…" style="flex:1;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--panel);color:var(--text);">
+    <button onclick="add()" style="padding:12px 16px;border-radius:14px;border:none;background:var(--accent);color:#fff;">Add</button>
   </div>
 </div>
 
 <script>
 function applyTheme(){
-  document.documentElement.dataset.theme=
-    localStorage.getItem("theme")||"dark";
+  document.documentElement.dataset.theme =
+    localStorage.getItem("theme") || "dark";
 }
 function toggleTheme(){
-  const t=localStorage.getItem("theme")==="dark"?"light":"dark";
+  const t = localStorage.getItem("theme")==="dark"?"light":"dark";
   localStorage.setItem("theme",t);applyTheme();
 }
 applyTheme();
@@ -63,16 +84,12 @@ let habits=JSON.parse(localStorage.getItem("habits")||"[]");
 function save(){localStorage.setItem("habits",JSON.stringify(habits));}
 function render(){
   list.innerHTML="";
-  if(!habits.length){
-    list.innerHTML='<div style="color:var(--muted);text-align:center;">No habits yet</div>';
-    return;
-  }
   habits.forEach((h,i)=>{
     const done=h.lastDone===today;
     list.innerHTML+=`
-      <div class="card" style="display:flex;justify-content:space-between;">
-        <div>${h.name}</div>
-        <div>
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:500">${h.name}</div>
+        <div style="display:flex;gap:8px;">
           <button onclick="done(${i})">${done?"✓":"Done"}</button>
           <button onclick="edit(${i})">✏️</button>
           <button onclick="del(${i})">🗑️</button>
@@ -81,8 +98,8 @@ function render(){
   });
 }
 function add(){
-  const v=input.value.trim();if(!v)return;
-  habits.push({name:v,lastDone:null});
+  if(!input.value.trim())return;
+  habits.push({name:input.value.trim(),lastDone:null});
   input.value="";save();render();
 }
 function done(i){habits[i].lastDone=today;save();render();}
