@@ -1,36 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proof Upload</title>
+<title>Proofs</title>
 
 <style>
 :root{
-  --bg:#020617;--card:#020617;--border:#1f2937;
-  --text:#e5e7eb;--muted:#94a3b8;--accent:#2563eb;
+  --bg:#020617;
+  --panel:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.12);
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#22c55e;
 }
 :root[data-theme="light"]{
-  --bg:#f8fafc;--card:#ffffff;--border:#e5e7eb;
-  --text:#0f172a;--muted:#475569;--accent:#2563eb;
+  --bg:#f1f5f9;
+  --panel:#ffffff;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#475569;
+  --accent:#16a34a;
 }
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);}
-.card{border:1px solid var(--border);border-radius:16px;padding:18px;}
-button{cursor:pointer;width:100%;padding:10px;border-radius:10px;
-border:none;background:var(--accent);color:white;font-weight:600;}
-input,select{
-  width:100%;padding:10px;margin-bottom:12px;
-  background:var(--bg);color:var(--text);
-  border:1px solid var(--border);border-radius:10px;
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:linear-gradient(160deg,#020617,#020617);
+  color:var(--text);
 }
+
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(2,6,23,.85);
+  backdrop-filter:blur(12px);
+}
+
+a{color:var(--muted);text-decoration:none;font-weight:500}
+a.active{color:var(--text);border-bottom:2px solid var(--accent);padding-bottom:6px}
+
+.container{
+  max-width:480px;
+  margin:28px auto;
+  padding:0 16px;
+}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+}
+
+input,button{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+}
+button{
+  cursor:pointer;
+  border-color:var(--accent);
+  color:var(--accent);
+}
+button:hover{background:rgba(34,197,94,0.15)}
 </style>
 </head>
 
 <body>
 
-<nav style="display:flex;justify-content:space-between;align-items:center;
-padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);">
-  <div style="display:flex;gap:16px;">
+<nav>
+  <div style="display:flex;gap:18px;">
     <a href="index.html">Tasks</a>
     <a href="habits.html">Habits</a>
     <a href="proofs.html" class="active">Proofs</a>
@@ -38,67 +86,59 @@ padding:14px 18px;border-bottom:1px solid var(--border);background:var(--card);"
   <button onclick="toggleTheme()">🌗</button>
 </nav>
 
-<div style="max-width:520px;margin:24px auto;padding:0 16px;">
+<div class="container">
+
   <div class="card">
-    <h3>Upload Proof 📸</h3>
+    <h3>Upload Proof</h3>
     <p style="color:var(--muted);font-size:14px;">
-      Upload image proof for completed work.
+      Upload images as proof of work.  
+      They are saved securely and linked to your tasks.
     </p>
 
-    <select id="source">
-      <option value="checklist">Checklist</option>
-      <option value="delegation">Delegation</option>
-      <option value="habit">Habit</option>
-    </select>
-
-    <input id="taskRef" placeholder="Task / Habit name">
-    <input type="file" id="file" accept="image/*" capture="environment">
-
+    <input type="file" id="file" accept="image/*">
     <button onclick="upload()">Upload</button>
-
-    <div id="status" style="margin-top:12px;font-size:14px;"></div>
   </div>
+
 </div>
 
 <script>
 function applyTheme(){
-  document.documentElement.dataset.theme=
-    localStorage.getItem("theme")||"dark";
+  document.documentElement.dataset.theme =
+    localStorage.getItem("theme") || "dark";
 }
 function toggleTheme(){
-  const t=localStorage.getItem("theme")==="dark"?"light":"dark";
-  localStorage.setItem("theme",t);applyTheme();
+  const t = localStorage.getItem("theme")==="dark"?"light":"dark";
+  localStorage.setItem("theme",t);
+  applyTheme();
 }
 applyTheme();
 
-const WORKER_URL="https://entirenewwrker.rkknitfabsachin.workers.dev/";
-const USER_EMAIL="rkknitfabsachin@gmail.com";
+const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
+const EMAIL = "rkknitfabsachin@gmail.com";
 
 function upload(){
-  const f=file.files[0];
-  if(!f||!taskRef.value.trim())return alert("Missing data");
-  status.textContent="Uploading…";
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose a file");
 
-  const r=new FileReader();
-  r.onload=()=>{
+  const reader=new FileReader();
+  reader.onload=()=>{
     fetch(WORKER_URL,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({
-        action:"saveProof",
-        email:USER_EMAIL,
-        source:source.value,
-        taskRef:taskRef.value.trim(),
-        imageUrl:r.result
+        action:"uploadProof",
+        email:EMAIL,
+        file:reader.result,
+        filename:file.name
       })
     })
     .then(r=>r.json())
-    .then(res=>{
-      status.textContent=res.success?"Uploaded ✅":"Failed ❌";
-      file.value="";taskRef.value="";
+    .then(r=>{
+      if(r.success) alert("Proof uploaded ✔");
+      else alert("Failed");
     });
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(file);
 }
 </script>
 
