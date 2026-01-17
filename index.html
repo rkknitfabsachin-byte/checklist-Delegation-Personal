@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tasks</title>
 
 <style>
@@ -53,7 +53,7 @@ nav{
 }
 
 .container{
-  max-width:460px;
+  max-width:480px;
   margin:28px auto;
   padding:0 16px;
 }
@@ -186,6 +186,7 @@ function loadTasks(){
           class="done-btn"
           data-source="${t.source}"
           data-task="${encodeURIComponent(t.task)}"
+          data-planned="${t.planned || ""}"
           onclick="handleDone(this)">
           Done
         </button>
@@ -198,23 +199,30 @@ function loadTasks(){
   });
 }
 
-/* ===== MARK DONE (WORKER ACTION) ===== */
+/* ===== MARK DONE (WORKER) ===== */
 function handleDone(btn){
   const source = btn.dataset.source;
   const taskRef = decodeURIComponent(btn.dataset.task);
+  const planned = btn.dataset.planned || null;
 
   btn.disabled = true;
   btn.textContent = "Saving…";
 
+  const payload = {
+    action:"markTaskDone",
+    source,
+    email:USER_EMAIL,
+    taskRef
+  };
+
+  if(source === "checklist" && planned){
+    payload.planned = planned;
+  }
+
   fetch(WORKER_URL,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      action:"markTaskDone",
-      source:source,
-      email:USER_EMAIL,
-      taskRef:taskRef
-    })
+    body: JSON.stringify(payload)
   })
   .then(r=>r.json())
   .then(res=>{
