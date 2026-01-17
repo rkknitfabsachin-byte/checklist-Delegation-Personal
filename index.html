@@ -4,47 +4,48 @@
   <meta charset="UTF-8" />
   <title>Today’s Tasks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:,">
 
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --border: #1f2933;
+      --bg: #020617;
+      --card: #020617;
+      --border: #1f2937;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --accent: #38bdf8;
       --checklist: #22c55e;
       --delegation: #fbbf24;
+      --done: #16a34a;
+      --btn: #1f2937;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont;
-      background: linear-gradient(180deg, #020617, #020617 60%, #020617);
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #020617, #020617 70%);
       color: var(--text);
     }
 
     .container {
-      max-width: 700px;
-      margin: 0 auto;
+      max-width: 720px;
+      margin: auto;
       padding: 20px;
     }
 
     h1 {
+      margin: 0;
       font-size: 1.4rem;
-      margin-bottom: 4px;
     }
 
     .sub {
       color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
     }
 
     .card {
-      background: rgba(17, 24, 39, 0.9);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
@@ -55,22 +56,15 @@
     }
 
     .badge {
+      font-size: 0.7rem;
       padding: 4px 8px;
       border-radius: 999px;
-      font-size: 0.7rem;
       font-weight: 600;
       white-space: nowrap;
     }
 
-    .badge.checklist {
-      background: rgba(34,197,94,.15);
-      color: var(--checklist);
-    }
-
-    .badge.delegation {
-      background: rgba(251,191,36,.15);
-      color: var(--delegation);
-    }
+    .checklist { color: var(--checklist); background: rgba(34,197,94,.12); }
+    .delegation { color: var(--delegation); background: rgba(251,191,36,.12); }
 
     .task {
       flex: 1;
@@ -78,38 +72,53 @@
       line-height: 1.4;
     }
 
-    .date {
-      color: var(--muted);
+    .time {
       font-size: 0.75rem;
+      color: var(--muted);
       margin-top: 4px;
+    }
+
+    button {
+      background: var(--btn);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    button.done {
+      background: rgba(22,163,74,.15);
+      color: var(--done);
+      border-color: rgba(22,163,74,.4);
+      cursor: default;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: default;
     }
 
     .empty {
       text-align: center;
-      padding: 40px 10px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 30px;
+      padding: 40px;
       color: var(--muted);
     }
   </style>
 </head>
+
 <body>
+<div class="container">
+  <h1>Today’s Tasks</h1>
+  <div class="sub" id="today"></div>
 
-  <div class="container">
-    <h1>Today’s Tasks</h1>
-    <div class="sub" id="today"></div>
-
-    <div id="tasks" class="loading">Loading tasks…</div>
-  </div>
+  <div id="tasks">Loading…</div>
+</div>
 
 <script>
   const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
-  const USER_EMAIL = "rkknitfabsachin@gmail.com"; // later dynamic
+  const USER_EMAIL = "rkknitfabsachin@gmail.com";
 
   document.getElementById("today").textContent =
     new Date().toLocaleDateString(undefined, {
@@ -118,21 +127,24 @@
       month: "long"
     });
 
-  fetch(WORKER_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getTodayTasks",
-      email: USER_EMAIL
+  fetchTasks();
+
+  function fetchTasks() {
+    fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "getTodayTasks",
+        email: USER_EMAIL
+      })
     })
-  })
-  .then(r => r.json())
-  .then(renderTasks)
-  .catch(err => {
-    document.getElementById("tasks").innerHTML =
-      "<div class='empty'>Failed to load tasks</div>";
-    console.error(err);
-  });
+    .then(r => r.json())
+    .then(renderTasks)
+    .catch(() => {
+      document.getElementById("tasks").innerHTML =
+        "<div class='empty'>Failed to load tasks</div>";
+    });
+  }
 
   function renderTasks(data) {
     const wrap = document.getElementById("tasks");
@@ -156,21 +168,68 @@
       body.className = "task";
       body.textContent = t.task;
 
-      const date = document.createElement("div");
-      date.className = "date";
-      date.textContent = new Date(t.planned).toLocaleTimeString([], {
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date(t.planned).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit"
       });
 
-      body.appendChild(date);
+      body.appendChild(time);
+
+      const btn = document.createElement("button");
+      btn.textContent = "Mark Done";
+
+      btn.onclick = () => markDone(t, btn);
+
       card.appendChild(badge);
       card.appendChild(body);
-
+      card.appendChild(btn);
       wrap.appendChild(card);
     });
   }
-</script>
 
+  function markDone(task, btn) {
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+
+    const payload = {
+      action: "markTaskDone",
+      email: USER_EMAIL,
+      source: task.source,
+      taskRef: task.task
+    };
+
+    if (task.source === "checklist") {
+      payload.planned =
+        new Date(task.planned).toISOString().slice(0, 10);
+    }
+
+    if (task.taskId) {
+      payload.taskId = task.taskId;
+    }
+
+    fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        btn.textContent = "Done ✓";
+        btn.classList.add("done");
+      } else {
+        btn.textContent = "Error";
+        btn.disabled = false;
+        console.error(res);
+      }
+    })
+    .catch(() => {
+      btn.textContent = "Error";
+      btn.disabled = false;
+    });
+  }
+</script>
 </body>
 </html>
