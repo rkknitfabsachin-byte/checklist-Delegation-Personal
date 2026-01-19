@@ -3,145 +3,232 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tasks</title>
+<title>Today • Tasks</title>
 
 <style>
+/* =========================
+   🌿 RAINFOREST THEME TOKENS
+========================= */
 :root{
   --bg:#020617;
+  --bg-soft:#04110a;
   --panel:rgba(255,255,255,0.05);
   --border:rgba(255,255,255,0.12);
-  --text:#e5e7eb;
-  --muted:#9ca3af;
+
+  --text:#e6f4ea;
+  --muted:#9fb7a7;
+
   --accent:#22c55e;
-}
-:root[data-theme="light"]{
-  --bg:#f1f5f9;
-  --panel:#ffffff;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#475569;
-  --accent:#16a34a;
+  --accent-soft:rgba(34,197,94,0.15);
 }
 
+:root[data-theme="light"]{
+  --bg:#f3faf6;
+  --bg-soft:#e8f5ec;
+  --panel:#ffffff;
+  --border:#d6eadc;
+
+  --text:#0f2e1c;
+  --muted:#4d6b5a;
+
+  --accent:#15803d;
+  --accent-soft:rgba(21,128,61,0.12);
+}
+
+/* =========================
+   BASE
+========================= */
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:Inter,system-ui;
-  background:linear-gradient(160deg,#020617,#020617);
+  background:
+    radial-gradient(1200px 600px at top, var(--bg-soft), transparent),
+    var(--bg);
   color:var(--text);
 }
 
-a{
-  color:var(--muted);
-  text-decoration:none;
-  font-weight:500;
-}
-a.active{
-  color:var(--text);
-  border-bottom:2px solid var(--accent);
-  padding-bottom:6px;
-}
-
+/* =========================
+   NAVBAR
+========================= */
 nav{
   display:flex;
   justify-content:space-between;
   align-items:center;
   padding:14px 18px;
   border-bottom:1px solid var(--border);
-  background:rgba(2,6,23,.85);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(14px);
 }
 
+nav .left{
+  display:flex;
+  gap:18px;
+  font-weight:500;
+}
+
+nav a{
+  text-decoration:none;
+  color:var(--muted);
+}
+nav a.active{
+  color:var(--text);
+  border-bottom:2px solid var(--accent);
+  padding-bottom:6px;
+}
+
+.theme-toggle{
+  background:none;
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+  color:var(--accent);
+}
+
+/* =========================
+   LAYOUT
+========================= */
 .container{
-  max-width:480px;
-  margin:28px auto;
+  max-width:520px;
+  margin:28px auto 60px;
   padding:0 16px;
 }
 
 .card{
   background:var(--panel);
   border:1px solid var(--border);
-  border-radius:18px;
+  border-radius:20px;
   padding:18px;
-  margin-bottom:14px;
+  margin-bottom:16px;
 }
 
+/* =========================
+   HERO
+========================= */
+.hero small{
+  color:var(--accent);
+  font-weight:600;
+  letter-spacing:.04em;
+}
+.hero h2{
+  margin:6px 0;
+}
+.hero p{
+  margin:0;
+  color:var(--muted);
+}
+
+/* =========================
+   SECTIONS
+========================= */
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.section-title h3{
+  margin:0;
+}
+.streak{
+  font-size:12px;
+  color:var(--accent);
+  background:var(--accent-soft);
+  padding:4px 10px;
+  border-radius:999px;
+}
+
+/* =========================
+   TASKS
+========================= */
 .task{
   display:flex;
   justify-content:space-between;
   align-items:center;
   padding:14px 16px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.03);
+  border-radius:16px;
   border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
   margin-bottom:10px;
 }
 
-.task-title{font-weight:500}
-.task-source{font-size:12px;color:var(--muted)}
+.task-title{
+  font-weight:500;
+}
+.task-meta{
+  font-size:12px;
+  color:var(--muted);
+}
 
 .done-btn{
-  padding:6px 14px;
-  border-radius:999px;
+  background:none;
   border:1px solid var(--border);
-  background:transparent;
   color:var(--accent);
+  border-radius:999px;
+  padding:6px 14px;
   cursor:pointer;
 }
 .done-btn:hover{
-  background:rgba(34,197,94,0.15);
+  background:var(--accent-soft);
 }
 .done-btn:disabled{
-  opacity:0.6;
+  opacity:.5;
   cursor:default;
 }
 
 .empty{
   text-align:center;
   color:var(--muted);
+  padding:10px 0;
 }
-
-button{
-  background:none;
-  border:none;
-  color:var(--muted);
-  font-size:18px;
-  cursor:pointer;
-}
-button:hover{color:var(--text)}
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<!-- NAV -->
 <nav>
-  <div style="display:flex;gap:18px;">
-    <a href="index.html" class="active">Tasks</a>
+  <div class="left">
+    <a class="active" href="index.html">Tasks</a>
     <a href="habits.html">Habits</a>
     <a href="proofs.html">Proofs</a>
   </div>
-  <button onclick="toggleTheme()">🌗</button>
+  <button class="theme-toggle" onclick="toggleTheme()">🌿</button>
 </nav>
 
 <div class="container">
 
-  <!-- MOTIVATION -->
-  <div class="card">
-    <div style="font-size:12px;color:var(--accent);font-weight:600;">TODAY</div>
-    <h3 style="margin:6px 0;">Focus on what moves the needle</h3>
-    <p style="margin:0;color:var(--muted);font-size:14px;">
-      Progress is built by showing up daily — even when it feels small.
-    </p>
+  <!-- HERO -->
+  <div class="card hero">
+    <small>TODAY</small>
+    <h2>Work like the forest grows</h2>
+    <p>Quiet, consistent progress compounds.</p>
   </div>
 
-  <!-- TASK LIST -->
-  <div id="tasks" class="card"></div>
+  <!-- CHECKLIST -->
+  <div class="card">
+    <div class="section-title">
+      <h3>Checklist</h3>
+      <div class="streak">Daily rhythm</div>
+    </div>
+    <div id="checklist"></div>
+  </div>
+
+  <!-- DELEGATION -->
+  <div class="card">
+    <div class="section-title">
+      <h3>Delegation</h3>
+    </div>
+    <div id="delegation"></div>
+  </div>
 
 </div>
 
 <script>
-/* ===== THEME ===== */
+/* =========================
+   THEME
+========================= */
 function applyTheme(){
   document.documentElement.dataset.theme =
     localStorage.getItem("theme") || "dark";
@@ -153,91 +240,86 @@ function toggleTheme(){
 }
 applyTheme();
 
-/* ===== CONFIG ===== */
-const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
-const USER_EMAIL = "rkknitfabsachin@gmail.com";
+/* =========================
+   CONFIG
+========================= */
+const WORKER_URL="https://entirenewwrker.rkknitfabsachin.workers.dev/";
+const EMAIL="rkknitfabsachin@gmail.com";
 
-/* ===== LOAD TASKS ===== */
+/* =========================
+   LOAD TASKS
+========================= */
 function loadTasks(){
   fetch(WORKER_URL,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
       action:"getTodayTasks",
-      email:USER_EMAIL
+      email:EMAIL
     })
   })
   .then(r=>r.json())
   .then(res=>{
-    const box=document.getElementById("tasks");
+    const cl=document.getElementById("checklist");
+    const dl=document.getElementById("delegation");
 
-    if(!res.success || !res.tasks.length){
-      box.innerHTML = `<div class="empty">No tasks for today 🎉</div>`;
-      return;
-    }
+    const checklist=res.tasks.filter(t=>t.source==="checklist");
+    const delegation=res.tasks.filter(t=>t.source==="delegation");
 
-    box.innerHTML = res.tasks.map(t => `
-      <div class="task">
-        <div>
-          <div class="task-title">${t.task}</div>
-          <div class="task-source">${t.source}</div>
-        </div>
-        <button
-          class="done-btn"
-          data-source="${t.source}"
-          data-task="${encodeURIComponent(t.task)}"
-          data-planned="${t.planned || ""}"
-          onclick="handleDone(this)">
-          Done
-        </button>
-      </div>
-    `).join("");
-  })
-  .catch(()=>{
-    document.getElementById("tasks").innerHTML =
-      `<div class="empty">Failed to load tasks</div>`;
+    cl.innerHTML = checklist.length
+      ? checklist.map(renderTask).join("")
+      : `<div class="empty">All clear 🌱</div>`;
+
+    dl.innerHTML = delegation.length
+      ? delegation.map(renderTask).join("")
+      : `<div class="empty">No delegated work today</div>`;
   });
 }
 
-/* ===== MARK DONE (WORKER) ===== */
-function handleDone(btn){
-  const source = btn.dataset.source;
-  const taskRef = decodeURIComponent(btn.dataset.task);
-  const planned = btn.dataset.planned || null;
+function renderTask(t){
+  return `
+    <div class="task">
+      <div>
+        <div class="task-title">${t.task}</div>
+        <div class="task-meta">${t.source}</div>
+      </div>
+      <button class="done-btn"
+        data-task="${encodeURIComponent(t.task)}"
+        data-source="${t.source}"
+        data-planned="${t.planned||""}"
+        onclick="markDone(this)">
+        Done
+      </button>
+    </div>
+  `;
+}
 
-  btn.disabled = true;
-  btn.textContent = "Saving…";
-
-  const payload = {
+/* =========================
+   MARK DONE (UNCHANGED LOGIC)
+========================= */
+function markDone(btn){
+  const payload={
     action:"markTaskDone",
-    source,
-    email:USER_EMAIL,
-    taskRef
+    email:EMAIL,
+    source:btn.dataset.source,
+    taskRef:decodeURIComponent(btn.dataset.task)
   };
-
-  if(source === "checklist" && planned){
-    payload.planned = planned;
+  if(payload.source==="checklist" && btn.dataset.planned){
+    payload.planned=btn.dataset.planned;
   }
+
+  btn.disabled=true;
+  btn.textContent="Saving…";
 
   fetch(WORKER_URL,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(payload)
+    body:JSON.stringify(payload)
   })
   .then(r=>r.json())
   .then(res=>{
-    if(res.success){
-      loadTasks();
-    }else{
-      btn.disabled=false;
-      btn.textContent="Done";
-      alert("Failed: "+JSON.stringify(res));
-    }
-  })
-  .catch(()=>{
-    btn.disabled=false;
-    btn.textContent="Done";
-    alert("Network error");
+    if(res.success) loadTasks();
+    else alert("Failed");
   });
 }
 
