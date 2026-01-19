@@ -6,14 +6,14 @@
 <title>Proofs</title>
 
 <style>
-/* ---------- ROOT ---------- */
+/* ================= ROOT ================= */
 :root{
   --radius:18px;
   --blur:18px;
   --transition:.3s ease;
 }
 
-/* ---------- THEMES ---------- */
+/* ================= THEMES ================= */
 body.dark{
   --bg1:#020617;
   --bg2:#030b1a;
@@ -23,7 +23,6 @@ body.dark{
   --muted:#9ca3af;
   --accent:#22c55e;
 }
-
 body.light{
   --bg1:#f4faf7;
   --bg2:#eaf4ef;
@@ -34,7 +33,7 @@ body.light{
   --accent:#16a34a;
 }
 
-/* ---------- BASE ---------- */
+/* ================= BASE ================= */
 body{
   margin:0;
   min-height:100vh;
@@ -46,7 +45,7 @@ body{
   transition:background var(--transition);
 }
 
-/* ---------- NAV ---------- */
+/* ================= NAV ================= */
 nav{
   display:flex;
   justify-content:space-between;
@@ -55,7 +54,6 @@ nav{
   backdrop-filter:blur(var(--blur));
   border-bottom:1px solid var(--border);
 }
-
 nav a{
   color:var(--muted);
   text-decoration:none;
@@ -88,13 +86,12 @@ nav a.active{
 }
 body.light .toggle::after{ left:23px }
 
-/* ---------- LAYOUT ---------- */
+/* ================= LAYOUT ================= */
 .container{
   max-width:520px;
   margin:36px auto;
   padding:0 18px;
 }
-
 .card{
   background:var(--panel);
   border:1px solid var(--border);
@@ -104,14 +101,13 @@ body.light .toggle::after{ left:23px }
   backdrop-filter:blur(var(--blur));
 }
 
-/* ---------- FORM ---------- */
+/* ================= FORM ================= */
 label{
   display:block;
   font-size:13px;
   color:var(--muted);
   margin-bottom:6px;
 }
-
 input,select{
   width:100%;
   padding:14px;
@@ -121,7 +117,6 @@ input,select{
   color:var(--text);
   margin-bottom:14px;
 }
-
 button{
   width:100%;
   padding:14px;
@@ -133,11 +128,10 @@ button{
   cursor:pointer;
 }
 
-/* ---------- STATUS ---------- */
+/* ================= STATUS ================= */
 .status{
   margin-top:14px;
   font-size:13px;
-  color:var(--muted);
 }
 .success{ color:var(--accent) }
 .error{ color:#ef4444 }
@@ -157,80 +151,92 @@ button{
 
 <div class="container">
 
-<div class="card">
-  <h3>Evidence Submission</h3>
-  <p style="color:var(--muted);font-size:14px">
-    Attach proof for completed work. This is securely logged and linked.
-  </p>
-</div>
+  <div class="card">
+    <h3>Evidence Submission</h3>
+    <p style="color:var(--muted);font-size:14px">
+      Submit proof for completed work. This evidence is securely saved and linked.
+    </p>
+  </div>
 
-<div class="card">
-  <label>What is this proof for?</label>
-  <input id="taskRef" placeholder="Task name / reference" />
+  <div class="card">
+    <label>What is this proof for?</label>
+    <input id="taskRef" placeholder="Task name / reference" />
 
-  <label>Where does this task belong?</label>
-  <select id="source">
-    <option value="checklist">Checklist</option>
-    <option value="delegation">Delegation</option>
-    <option value="habit">Habit</option>
-  </select>
+    <label>Where does this task belong?</label>
+    <select id="source">
+      <option value="checklist">Checklist</option>
+      <option value="delegation">Delegation</option>
+      <option value="habit">Habit</option>
+    </select>
 
-  <label>How do you prove it?</label>
-  <input type="file" id="file" accept="image/*" />
+    <label>How do you prove it?</label>
+    <input type="file" id="file" accept="image/*" />
 
-  <button onclick="upload()">Submit Evidence</button>
+    <button onclick="uploadProof()">Submit Evidence</button>
 
-  <div id="status" class="status"></div>
-</div>
+    <div id="status" class="status"></div>
+  </div>
 
 </div>
 
 <script>
-/* --------- THEME --------- */
+/* ================= CONFIG ================= */
+/* 🔴 THIS WAS THE MISSING PART EARLIER */
+const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
+
+/* ================= THEME ================= */
 function toggleTheme(){
   document.body.classList.toggle("light");
   document.body.classList.toggle("dark");
 }
 
-/* --------- PROOF LOGIC (UNCHANGED FLOW) --------- */
-async function upload(){
-  const taskRef=document.getElementById("taskRef").value.trim();
-  const source=document.getElementById("source").value;
-  const file=document.getElementById("file").files[0];
-  const status=document.getElementById("status");
+/* ================= UPLOAD LOGIC ================= */
+/* Backend flow is UNCHANGED */
+function uploadProof(){
+  const taskRef = document.getElementById("taskRef").value.trim();
+  const source  = document.getElementById("source").value;
+  const file    = document.getElementById("file").files[0];
+  const status  = document.getElementById("status");
 
-  if(!taskRef || !file){
-    status.textContent="Task and image required.";
-    status.className="status error";
+  if (!taskRef || !file) {
+    status.textContent = "Task reference and image are required.";
+    status.className = "status error";
     return;
   }
 
-  const reader=new FileReader();
-  reader.onload=async ()=>{
-    try{
-      const res=await fetch(WORKER_URL,{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          action:"uploadProof",
+  const reader = new FileReader();
+
+  reader.onload = async () => {
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "uploadProof",
           taskRef,
           source,
-          file:reader.result
+          file: reader.result
         })
       });
-      const json=await res.json();
-      if(json.success){
-        status.textContent="Evidence recorded successfully.";
-        status.className="status success";
-      }else{
-        status.textContent=json.error||"Upload failed.";
-        status.className="status error";
+
+      const json = await res.json();
+
+      if (json.success) {
+        status.textContent = "Evidence recorded successfully.";
+        status.className = "status success";
+        document.getElementById("file").value = "";
+      } else {
+        status.textContent = json.error || "Upload failed.";
+        status.className = "status error";
       }
-    }catch(e){
-      status.textContent="Network error.";
-      status.className="status error";
+
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Network error.";
+      status.className = "status error";
     }
   };
+
   reader.readAsDataURL(file);
 }
 </script>
