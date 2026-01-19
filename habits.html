@@ -6,92 +6,134 @@
 <title>Habits</title>
 
 <style>
+/* ---------------- ROOT SYSTEM ---------------- */
 :root{
-  --bg:#020617;
-  --panel:rgba(255,255,255,0.05);
-  --border:rgba(255,255,255,0.12);
+  --radius:20px;
+  --blur:18px;
+  --transition:.35s cubic-bezier(.4,0,.2,1);
+}
+
+/* --------- THEMES (ELEMENTAL) --------- */
+body.fire{ --grad1:#2a0a0a; --grad2:#120404; --accent:#ef4444 }
+body.water{ --grad1:#031926; --grad2:#020b12; --accent:#0ea5e9 }
+body.wind{ --grad1:#0b1a0f; --grad2:#040c06; --accent:#84cc16 }
+body.ice{ --grad1:#04121d; --grad2:#02080d; --accent:#38bdf8 }
+body.earth{ --grad1:#0b1d14; --grad2:#04100a; --accent:#22c55e }
+
+/* --------- LIGHT MODE OVERRIDES --------- */
+body.light{
+  --grad1:#f2fbf5;
+  --grad2:#e6f4ec;
+  --panel:#ffffff;
+  --text:#062a18;
+  --muted:#567a66;
+  --border:#d6eadc;
+}
+body.dark{
+  --panel:rgba(255,255,255,.06);
   --text:#e5e7eb;
   --muted:#9ca3af;
-}
-:root[data-theme="light"]{
-  --bg:#f3faf6;
-  --panel:#ffffff;
-  --border:#d6eadc;
-  --text:#0f2e1c;
-  --muted:#4d6b5a;
+  --border:rgba(255,255,255,.12);
 }
 
+/* ---------------- BASE ---------------- */
 body{
   margin:0;
+  min-height:100vh;
   font-family:Inter,system-ui;
-  background:var(--bg);
+  background:
+    radial-gradient(1200px 600px at top,var(--grad1),transparent),
+    linear-gradient(to bottom,var(--grad2),#020617);
   color:var(--text);
+  transition:background var(--transition);
 }
 
+/* ---------------- NAV ---------------- */
 nav{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 18px;
+  padding:16px 22px;
+  backdrop-filter:blur(var(--blur));
   border-bottom:1px solid var(--border);
 }
 
-a{color:var(--muted);text-decoration:none;font-weight:500}
-a.active{color:var(--text);border-bottom:2px solid #22c55e;padding-bottom:6px}
+nav a{
+  color:var(--muted);
+  text-decoration:none;
+  margin-right:16px;
+  font-weight:500;
+}
+nav a.active{
+  color:var(--accent);
+  border-bottom:2px solid var(--accent);
+  padding-bottom:6px;
+}
 
+/* Theme toggle */
+.toggle{
+  width:42px;
+  height:22px;
+  border-radius:999px;
+  background:var(--border);
+  position:relative;
+  cursor:pointer;
+}
+.toggle::after{
+  content:"";
+  position:absolute;
+  top:3px; left:3px;
+  width:16px; height:16px;
+  border-radius:50%;
+  background:var(--accent);
+  transition:var(--transition);
+}
+body.light .toggle::after{ left:23px }
+
+/* ---------------- LAYOUT ---------------- */
 .container{
   max-width:520px;
-  margin:28px auto;
-  padding:0 16px;
+  margin:36px auto;
+  padding:0 18px;
 }
 
 .card{
   background:var(--panel);
   border:1px solid var(--border);
-  border-radius:20px;
-  padding:18px;
-  margin-bottom:16px;
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:18px;
+  backdrop-filter:blur(var(--blur));
 }
 
+/* ---------------- INPUTS ---------------- */
 input,select{
   width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid var(--border);
+  padding:14px;
+  border-radius:14px;
   background:transparent;
+  border:1px solid var(--border);
   color:var(--text);
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
-button{
-  background:none;
-  border:none;
-  cursor:pointer;
-}
-
-/* ELEMENT COLORS */
-.fire{--accent:#ef4444}
-.ice{--accent:#38bdf8}
-.water{--accent:#0ea5e9}
-.wind{--accent:#a3e635}
-.earth{--accent:#22c55e}
-
+/* ---------------- HABITS ---------------- */
 .habit{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 16px;
+  padding:16px;
   border-radius:16px;
   border:1px solid var(--border);
-  margin-bottom:10px;
-  transition:.25s;
+  margin-bottom:12px;
+  transition:var(--transition);
 }
-
 .habit.done{
-  opacity:.5;
+  opacity:.45;
   text-decoration:line-through;
 }
 
+/* Done circle */
 .circle{
   width:22px;
   height:22px;
@@ -101,25 +143,34 @@ button{
 }
 .circle.done{
   background:var(--accent);
-  box-shadow:0 0 12px var(--accent);
+  box-shadow:0 0 16px var(--accent);
 }
 
+/* Delete */
 .delete{
-  color:#ef4444;
   margin-left:10px;
+  color:#ef4444;
+  cursor:pointer;
+}
+
+/* Buttons */
+.btn{
+  color:var(--accent);
+  font-weight:600;
+  cursor:pointer;
 }
 </style>
 </head>
 
-<body>
+<body class="dark earth">
 
 <nav>
-  <div style="display:flex;gap:18px">
+  <div>
     <a href="index.html">Tasks</a>
     <a href="habits.html" class="active">Habits</a>
     <a href="proofs.html">Proofs</a>
   </div>
-  <button onclick="toggleTheme()">🌗</button>
+  <div class="toggle" onclick="toggleMode()"></div>
 </nav>
 
 <div class="container">
@@ -128,56 +179,53 @@ button{
   <h3>Create Habit</h3>
   <input id="title" placeholder="Habit name…" />
 
-  <select id="frequency">
+  <select id="freq">
     <option value="1">Daily</option>
     <option value="2">Every 2 days</option>
     <option value="7">Weekly</option>
   </select>
 
-  <select id="element">
+  <select id="element" onchange="applyElement(this.value)">
+    <option value="earth">🌱 Earth</option>
     <option value="fire">🔥 Fire</option>
-    <option value="ice">❄️ Ice</option>
     <option value="water">🌊 Water</option>
     <option value="wind">🌬️ Wind</option>
-    <option value="earth">🌱 Earth</option>
+    <option value="ice">❄️ Ice</option>
   </select>
 
-  <button onclick="addHabit()" style="color:#22c55e">Add Habit</button>
+  <div class="btn" onclick="addHabit()">Add Habit</div>
 </div>
 
 <div class="card">
   <h3>My Habits</h3>
-  <div id="habits"></div>
+  <div id="list"></div>
 </div>
 
 </div>
 
 <script>
-function applyTheme(){
-  document.documentElement.dataset.theme =
-    localStorage.getItem("theme") || "dark";
-}
-function toggleTheme(){
-  const t = localStorage.getItem("theme")==="dark"?"light":"dark";
-  localStorage.setItem("theme",t);
-  applyTheme();
-}
-applyTheme();
+const KEY="habits_v3";
 
-const KEY="habits_v2";
+function today(){ return new Date().toISOString().slice(0,10); }
 
-function today(){
-  return new Date().toISOString().slice(0,10);
+/* Theme */
+function toggleMode(){
+  document.body.classList.toggle("light");
+  document.body.classList.toggle("dark");
+}
+function applyElement(el){
+  document.body.className=document.body.className
+    .replace(/fire|water|wind|ice|earth/,el);
 }
 
+/* Habits */
 function load(){
   const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  const box=document.getElementById("habits");
-
+  const box=document.getElementById("list");
   box.innerHTML=list.map((h,i)=>{
-    const doneToday=h.lastDone===today();
+    const done=h.lastDone===today();
     return `
-      <div class="habit ${h.element} ${doneToday?'done':''}">
+      <div class="habit ${done?'done':''}">
         <div>
           ${h.title}
           <div style="font-size:12px;color:var(--muted)">
@@ -185,23 +233,19 @@ function load(){
           </div>
         </div>
         <div style="display:flex;align-items:center">
-          <div class="circle ${doneToday?'done':''}"
-            onclick="toggleDone(${i})"></div>
-          <button class="delete" onclick="removeHabit(${i})">🗑</button>
+          <div class="circle ${done?'done':''}" onclick="toggleDone(${i})"></div>
+          <span class="delete" onclick="del(${i})">🗑</span>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join("") || "<p style='color:var(--muted)'>No habits yet</p>";
 }
 
 function addHabit(){
   const title=document.getElementById("title").value.trim();
-  if(!title)return;
-  const freq=+document.getElementById("frequency").value;
-  const element=document.getElementById("element").value;
-
+  if(!title) return;
+  const freq=+document.getElementById("freq").value;
   const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  list.push({title,freq,element,lastDone:null});
+  list.push({title,freq,lastDone:null});
   localStorage.setItem(KEY,JSON.stringify(list));
   document.getElementById("title").value="";
   load();
@@ -209,14 +253,13 @@ function addHabit(){
 
 function toggleDone(i){
   const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  list[i].lastDone =
-    list[i].lastDone===today()?null:today();
+  list[i].lastDone=list[i].lastDone===today()?null:today();
   localStorage.setItem(KEY,JSON.stringify(list));
   load();
 }
 
-function removeHabit(i){
-  if(!confirm("Are you sure you want to delete this habit?"))return;
+function del(i){
+  if(!confirm("Delete this habit?"))return;
   const list=JSON.parse(localStorage.getItem(KEY)||"[]");
   list.splice(i,1);
   localStorage.setItem(KEY,JSON.stringify(list));
