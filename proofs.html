@@ -66,7 +66,7 @@ nav a.active{
   padding-bottom:6px;
 }
 
-/* Theme Toggle */
+/* Toggle */
 .toggle{
   width:42px;
   height:22px;
@@ -154,7 +154,7 @@ button{
   <div class="card">
     <h3>Evidence Submission</h3>
     <p style="color:var(--muted);font-size:14px">
-      Attach proof for completed work. This evidence is securely stored and linked.
+      Attach proof for completed work. This evidence is securely saved and linked.
     </p>
   </div>
 
@@ -189,16 +189,28 @@ function toggleTheme(){
   document.body.classList.toggle("dark");
 }
 
+/* ================= USER EMAIL HANDLING ================= */
+function getUserEmail(){
+  let email = localStorage.getItem("userEmail");
+  if (!email) {
+    email = prompt("Enter your work email");
+    if (email) {
+      localStorage.setItem("userEmail", email.trim());
+    }
+  }
+  return email;
+}
+
 /* ================= UPLOAD LOGIC ================= */
 function uploadProof(){
   const taskRef = document.getElementById("taskRef").value.trim();
   const source  = document.getElementById("source").value;
   const file    = document.getElementById("file").files[0];
   const status  = document.getElementById("status");
-  const email   = localStorage.getItem("userEmail"); // ✅ REQUIRED
+  const email   = getUserEmail();
 
   if (!email) {
-    status.textContent = "User email not found. Please reload.";
+    status.textContent = "User email is required.";
     status.className = "status error";
     return;
   }
