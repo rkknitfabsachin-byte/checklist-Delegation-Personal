@@ -66,7 +66,7 @@ nav a.active{
   padding-bottom:6px;
 }
 
-/* Toggle */
+/* Theme Toggle */
 .toggle{
   width:42px;
   height:22px;
@@ -154,7 +154,7 @@ button{
   <div class="card">
     <h3>Evidence Submission</h3>
     <p style="color:var(--muted);font-size:14px">
-      Submit proof for completed work. This evidence is securely saved and linked.
+      Attach proof for completed work. This evidence is securely stored and linked.
     </p>
   </div>
 
@@ -181,7 +181,6 @@ button{
 
 <script>
 /* ================= CONFIG ================= */
-/* 🔴 THIS WAS THE MISSING PART EARLIER */
 const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
 
 /* ================= THEME ================= */
@@ -191,12 +190,18 @@ function toggleTheme(){
 }
 
 /* ================= UPLOAD LOGIC ================= */
-/* Backend flow is UNCHANGED */
 function uploadProof(){
   const taskRef = document.getElementById("taskRef").value.trim();
   const source  = document.getElementById("source").value;
   const file    = document.getElementById("file").files[0];
   const status  = document.getElementById("status");
+  const email   = localStorage.getItem("userEmail"); // ✅ REQUIRED
+
+  if (!email) {
+    status.textContent = "User email not found. Please reload.";
+    status.className = "status error";
+    return;
+  }
 
   if (!taskRef || !file) {
     status.textContent = "Task reference and image are required.";
@@ -213,6 +218,7 @@ function uploadProof(){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "uploadProof",
+          email,
           taskRef,
           source,
           file: reader.result
