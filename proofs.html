@@ -6,14 +6,11 @@
 <title>Proofs</title>
 
 <style>
-/* ================= ROOT ================= */
 :root{
   --radius:18px;
   --blur:18px;
-  --transition:.3s ease;
 }
 
-/* ================= THEMES ================= */
 body.dark{
   --bg1:#020617;
   --bg2:#030b1a;
@@ -33,7 +30,6 @@ body.light{
   --accent:#16a34a;
 }
 
-/* ================= BASE ================= */
 body{
   margin:0;
   min-height:100vh;
@@ -42,10 +38,8 @@ body{
     radial-gradient(1000px 500px at top,var(--bg2),transparent),
     linear-gradient(to bottom,var(--bg1),#020617);
   color:var(--text);
-  transition:background var(--transition);
 }
 
-/* ================= NAV ================= */
 nav{
   display:flex;
   justify-content:space-between;
@@ -54,11 +48,11 @@ nav{
   backdrop-filter:blur(var(--blur));
   border-bottom:1px solid var(--border);
 }
+
 nav a{
   color:var(--muted);
   text-decoration:none;
   margin-right:16px;
-  font-weight:500;
 }
 nav a.active{
   color:var(--accent);
@@ -66,7 +60,6 @@ nav a.active{
   padding-bottom:6px;
 }
 
-/* Toggle */
 .toggle{
   width:42px;
   height:22px;
@@ -82,26 +75,23 @@ nav a.active{
   width:16px; height:16px;
   border-radius:50%;
   background:var(--accent);
-  transition:.25s;
 }
 body.light .toggle::after{ left:23px }
 
-/* ================= LAYOUT ================= */
 .container{
   max-width:520px;
   margin:36px auto;
   padding:0 18px;
 }
+
 .card{
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:20px;
   margin-bottom:18px;
-  backdrop-filter:blur(var(--blur));
 }
 
-/* ================= FORM ================= */
 label{
   display:block;
   font-size:13px;
@@ -125,10 +115,8 @@ button{
   background:transparent;
   color:var(--accent);
   font-weight:600;
-  cursor:pointer;
 }
 
-/* ================= STATUS ================= */
 .status{
   margin-top:14px;
   font-size:13px;
@@ -154,13 +142,13 @@ button{
   <div class="card">
     <h3>Evidence Submission</h3>
     <p style="color:var(--muted);font-size:14px">
-      Attach proof for completed work. This evidence is securely saved and linked.
+      Upload proof for completed work.
     </p>
   </div>
 
   <div class="card">
     <label>What is this proof for?</label>
-    <input id="taskRef" placeholder="Task name / reference" />
+    <input id="taskRef" placeholder="Task reference" />
 
     <label>Where does this task belong?</label>
     <select id="source">
@@ -173,7 +161,6 @@ button{
     <input type="file" id="file" accept="image/*" />
 
     <button onclick="uploadProof()">Submit Evidence</button>
-
     <div id="status" class="status"></div>
   </div>
 
@@ -183,25 +170,28 @@ button{
 /* ================= CONFIG ================= */
 const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
 
+/* 🔴 THIS MUST MATCH YOUR WORKER */
+const ACTION_UPLOAD_PROOF = "uploadProof"; 
+// If your worker expects a different name,
+// change ONLY this line.
+
 /* ================= THEME ================= */
 function toggleTheme(){
   document.body.classList.toggle("light");
   document.body.classList.toggle("dark");
 }
 
-/* ================= USER EMAIL HANDLING ================= */
+/* ================= EMAIL ================= */
 function getUserEmail(){
   let email = localStorage.getItem("userEmail");
   if (!email) {
     email = prompt("Enter your work email");
-    if (email) {
-      localStorage.setItem("userEmail", email.trim());
-    }
+    if (email) localStorage.setItem("userEmail", email.trim());
   }
   return email;
 }
 
-/* ================= UPLOAD LOGIC ================= */
+/* ================= UPLOAD ================= */
 function uploadProof(){
   const taskRef = document.getElementById("taskRef").value.trim();
   const source  = document.getElementById("source").value;
@@ -209,27 +199,20 @@ function uploadProof(){
   const status  = document.getElementById("status");
   const email   = getUserEmail();
 
-  if (!email) {
-    status.textContent = "User email is required.";
-    status.className = "status error";
-    return;
-  }
-
-  if (!taskRef || !file) {
-    status.textContent = "Task reference and image are required.";
+  if (!email || !taskRef || !file) {
+    status.textContent = "Email, task and image are required.";
     status.className = "status error";
     return;
   }
 
   const reader = new FileReader();
-
   reader.onload = async () => {
     try {
       const res = await fetch(WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "uploadProof",
+          action: ACTION_UPLOAD_PROOF,
           email,
           taskRef,
           source,
@@ -240,21 +223,18 @@ function uploadProof(){
       const json = await res.json();
 
       if (json.success) {
-        status.textContent = "Evidence recorded successfully.";
+        status.textContent = "Evidence saved successfully.";
         status.className = "status success";
         document.getElementById("file").value = "";
       } else {
         status.textContent = json.error || "Upload failed.";
         status.className = "status error";
       }
-
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
       status.textContent = "Network error.";
       status.className = "status error";
     }
   };
-
   reader.readAsDataURL(file);
 }
 </script>
