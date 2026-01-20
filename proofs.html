@@ -2,241 +2,206 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<title>Submit Proof</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Proofs</title>
 
 <style>
-:root{
-  --radius:18px;
-  --blur:18px;
+:root {
+  --bg: #0b1020;
+  --card: #11172a;
+  --border: #1e2642;
+  --text: #e6ebff;
+  --muted: #9aa4d8;
+  --accent: #22c55e;
+  --danger: #ef4444;
 }
 
-body.dark{
-  --bg1:#020617;
-  --bg2:#030b1a;
-  --panel:rgba(255,255,255,.05);
-  --border:rgba(255,255,255,.12);
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#22c55e;
-}
-body.light{
-  --bg1:#f4faf7;
-  --bg2:#eaf4ef;
-  --panel:#ffffff;
-  --border:#d6eadc;
-  --text:#0f2e1c;
-  --muted:#4d6b5a;
-  --accent:#16a34a;
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto;
+  background: radial-gradient(circle at top, #121a3a, #070b18);
+  color: var(--text);
 }
 
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:Inter,system-ui;
-  background:
-    radial-gradient(1000px 500px at top,var(--bg2),transparent),
-    linear-gradient(to bottom,var(--bg1),#020617);
-  color:var(--text);
+.nav {
+  display: flex;
+  gap: 20px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-nav{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px 22px;
-  backdrop-filter:blur(var(--blur));
-  border-bottom:1px solid var(--border);
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
 }
 
-nav a{
-  color:var(--muted);
-  text-decoration:none;
-  margin-right:16px;
-}
-nav a.active{
-  color:var(--accent);
-  border-bottom:2px solid var(--accent);
-  padding-bottom:6px;
+.nav a.active {
+  color: var(--accent);
 }
 
-.toggle{
-  width:42px;
-  height:22px;
-  border-radius:999px;
-  background:var(--border);
-  position:relative;
-  cursor:pointer;
-}
-.toggle::after{
-  content:"";
-  position:absolute;
-  top:3px; left:3px;
-  width:16px; height:16px;
-  border-radius:50%;
-  background:var(--accent);
-}
-body.light .toggle::after{ left:23px }
-
-.container{
-  max-width:520px;
-  margin:36px auto;
-  padding:0 18px;
+.wrapper {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 20px;
 }
 
-.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:20px;
-  margin-bottom:18px;
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
 }
 
-label{
-  display:block;
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-input,select{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  margin-bottom:14px;
-}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:1px solid var(--accent);
-  background:transparent;
-  color:var(--accent);
-  font-weight:600;
+h2 {
+  margin: 0 0 6px;
 }
 
-.status{
-  margin-top:14px;
-  font-size:13px;
+p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14px;
 }
-.success{ color:var(--accent) }
-.error{ color:#ef4444 }
+
+label {
+  display: block;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input, select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0d1326;
+  color: var(--text);
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 12px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.success {
+  margin-top: 12px;
+  color: var(--accent);
+  font-size: 13px;
+}
 </style>
 </head>
 
-<body class="dark">
+<body>
 
-<nav>
-  <div>
-    <a href="index.html">Tasks</a>
-    <a href="habits.html">Habits</a>
-    <a href="proofs.html" class="active">Proofs</a>
-  </div>
-  <div class="toggle" onclick="toggleTheme()"></div>
-</nav>
+<div class="nav">
+  <a href="index.html">Tasks</a>
+  <a href="habits.html">Habits</a>
+  <a href="proofs.html" class="active">Proofs</a>
+</div>
 
-<div class="container">
-
+<div class="wrapper">
   <div class="card">
-    <h3>Evidence Submission</h3>
-    <p style="color:var(--muted);font-size:14px">
-      Upload proof for completed work.
-    </p>
-  </div>
+    <h2>Evidence Submission</h2>
+    <p>Upload proof for completed work.</p>
 
-  <div class="card">
     <label>What is this proof for?</label>
-    <input id="taskRef" placeholder="Task reference" />
+    <input id="taskRef" placeholder="Describe the task" />
 
     <label>Where does this task belong?</label>
     <select id="source">
       <option value="checklist">Checklist</option>
       <option value="delegation">Delegation</option>
-      <option value="habit">Habit</option>
+      <option value="admin">Admin</option>
     </select>
 
     <label>How do you prove it?</label>
     <input type="file" id="file" accept="image/*" />
 
-    <button onclick="uploadProof()">Submit Evidence</button>
-    <div id="status" class="status"></div>
-  </div>
+    <button id="submitBtn">Submit Evidence</button>
 
+    <div id="msg" class=""></div>
+  </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
 const WORKER_URL = "https://entirenewwrker.rkknitfabsachin.workers.dev/";
+const USER_EMAIL = localStorage.getItem("userEmail") || "rkknitfabsachin@gmail.com";
 
-/* 🔴 THIS MUST MATCH YOUR WORKER */
-const ACTION_UPLOAD_PROOF = "uploadProof"; 
-// If your worker expects a different name,
-// change ONLY this line.
+const btn = document.getElementById("submitBtn");
+const msg = document.getElementById("msg");
 
-/* ================= THEME ================= */
-function toggleTheme(){
-  document.body.classList.toggle("light");
-  document.body.classList.toggle("dark");
-}
+btn.onclick = async () => {
+  msg.textContent = "";
+  msg.className = "";
 
-/* ================= EMAIL ================= */
-function getUserEmail(){
-  let email = localStorage.getItem("userEmail");
-  if (!email) {
-    email = prompt("Enter your work email");
-    if (email) localStorage.setItem("userEmail", email.trim());
-  }
-  return email;
-}
-
-/* ================= UPLOAD ================= */
-function uploadProof(){
   const taskRef = document.getElementById("taskRef").value.trim();
-  const source  = document.getElementById("source").value;
-  const file    = document.getElementById("file").files[0];
-  const status  = document.getElementById("status");
-  const email   = getUserEmail();
+  const source = document.getElementById("source").value;
+  const file = document.getElementById("file").files[0];
 
-  if (!email || !taskRef || !file) {
-    status.textContent = "Email, task and image are required.";
-    status.className = "status error";
+  if (!taskRef || !file) {
+    msg.textContent = "All fields are required";
+    msg.className = "error";
     return;
   }
+
+  btn.disabled = true;
 
   const reader = new FileReader();
   reader.onload = async () => {
     try {
+      const payload = {
+        action: "uploadProof",
+        email: USER_EMAIL,
+        taskRef,
+        source,
+        imageUrl: reader.result
+      };
+
       const res = await fetch(WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: ACTION_UPLOAD_PROOF,
-          email,
-          taskRef,
-          source,
-          file: reader.result
-        })
+        body: JSON.stringify(payload)
       });
 
-      const json = await res.json();
+      const data = await res.json();
 
-      if (json.success) {
-        status.textContent = "Evidence saved successfully.";
-        status.className = "status success";
-        document.getElementById("file").value = "";
-      } else {
-        status.textContent = json.error || "Upload failed.";
-        status.className = "status error";
-      }
-    } catch (e) {
-      status.textContent = "Network error.";
-      status.className = "status error";
+      if (!data.success) throw data.error || "FAILED";
+
+      msg.textContent = "Evidence uploaded successfully";
+      msg.className = "success";
+      document.getElementById("taskRef").value = "";
+      document.getElementById("file").value = "";
+
+    } catch (err) {
+      msg.textContent = String(err);
+      msg.className = "error";
+    } finally {
+      btn.disabled = false;
     }
   };
+
   reader.readAsDataURL(file);
-}
+};
 </script>
 
 </body>
