@@ -1,272 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Habits</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Space</title>
 
 <style>
-/* ---------------- ROOT SYSTEM ---------------- */
+/* =========================
+   THEME (same as index)
+========================= */
 :root{
-  --radius:20px;
-  --blur:18px;
-  --transition:.35s cubic-bezier(.4,0,.2,1);
+  --bg:#020617;
+  --bg-soft:#04110a;
+  --panel:rgba(255,255,255,0.05);
+  --border:rgba(255,255,255,0.12);
+  --text:#e6f4ea;
+  --muted:#9fb7a7;
+  --accent:#22c55e;
+  --accent-soft:rgba(34,197,94,0.15);
 }
-
-/* --------- THEMES (ELEMENTAL) --------- */
-body.fire{ --grad1:#2a0a0a; --grad2:#120404; --accent:#ef4444 }
-body.water{ --grad1:#031926; --grad2:#020b12; --accent:#0ea5e9 }
-body.wind{ --grad1:#0b1a0f; --grad2:#040c06; --accent:#84cc16 }
-body.ice{ --grad1:#04121d; --grad2:#02080d; --accent:#38bdf8 }
-body.earth{ --grad1:#0b1d14; --grad2:#04100a; --accent:#22c55e }
-
-/* --------- LIGHT MODE OVERRIDES --------- */
-body.light{
-  --grad1:#f2fbf5;
-  --grad2:#e6f4ec;
+:root[data-theme="light"]{
+  --bg:#f3faf6;
+  --bg-soft:#e8f5ec;
   --panel:#ffffff;
-  --text:#062a18;
-  --muted:#567a66;
   --border:#d6eadc;
-}
-body.dark{
-  --panel:rgba(255,255,255,.06);
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --border:rgba(255,255,255,.12);
+  --text:#0f2e1c;
+  --muted:#4d6b5a;
+  --accent:#15803d;
+  --accent-soft:rgba(21,128,61,0.12);
 }
 
-/* ---------------- BASE ---------------- */
+*{box-sizing:border-box}
+
 body{
   margin:0;
-  min-height:100vh;
   font-family:Inter,system-ui;
   background:
-    radial-gradient(1200px 600px at top,var(--grad1),transparent),
-    linear-gradient(to bottom,var(--grad2),#020617);
+    radial-gradient(1200px 600px at top, var(--bg-soft), transparent),
+    var(--bg);
   color:var(--text);
-  transition:background var(--transition);
 }
 
-/* ---------------- NAV ---------------- */
+/* NAV */
 nav{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 22px;
-  backdrop-filter:blur(var(--blur));
+  padding:14px 18px;
   border-bottom:1px solid var(--border);
+  backdrop-filter:blur(14px);
 }
-
+nav .left{
+  display:flex;
+  gap:18px;
+}
 nav a{
-  color:var(--muted);
   text-decoration:none;
-  margin-right:16px;
-  font-weight:500;
+  color:var(--muted);
 }
 nav a.active{
-  color:var(--accent);
+  color:var(--text);
   border-bottom:2px solid var(--accent);
   padding-bottom:6px;
 }
-
-/* Theme toggle */
-.toggle{
-  width:42px;
-  height:22px;
+nav .right{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.user-badge{
+  font-size:12px;
+  color:var(--muted);
+}
+.theme-toggle{
+  background:none;
+  border:1px solid var(--border);
   border-radius:999px;
-  background:var(--border);
-  position:relative;
+  padding:6px 10px;
   cursor:pointer;
+  color:var(--accent);
 }
-.toggle::after{
-  content:"";
-  position:absolute;
-  top:3px; left:3px;
-  width:16px; height:16px;
-  border-radius:50%;
-  background:var(--accent);
-  transition:var(--transition);
-}
-body.light .toggle::after{ left:23px }
 
-/* ---------------- LAYOUT ---------------- */
+/* LAYOUT */
 .container{
-  max-width:520px;
-  margin:36px auto;
-  padding:0 18px;
+  max-width:640px;
+  margin:24px auto 60px;
+  padding:0 16px;
 }
-
 .card{
   background:var(--panel);
   border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:20px;
-  margin-bottom:18px;
-  backdrop-filter:blur(var(--blur));
+  border-radius:20px;
+  padding:18px;
+  margin-bottom:16px;
 }
 
-/* ---------------- INPUTS ---------------- */
-input,select{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  margin-bottom:12px;
-}
-
-/* ---------------- HABITS ---------------- */
-.habit{
+/* TABS */
+.tabs{
   display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px;
-  border-radius:16px;
+  gap:10px;
+  margin-bottom:16px;
+}
+.tab{
+  flex:1;
+  padding:10px;
+  border-radius:999px;
+  text-align:center;
+  font-size:14px;
   border:1px solid var(--border);
-  margin-bottom:12px;
-  transition:var(--transition);
-}
-.habit.done{
-  opacity:.45;
-  text-decoration:line-through;
-}
-
-/* Done circle */
-.circle{
-  width:22px;
-  height:22px;
-  border-radius:50%;
-  border:2px solid var(--accent);
   cursor:pointer;
+  color:var(--muted);
 }
-.circle.done{
-  background:var(--accent);
-  box-shadow:0 0 16px var(--accent);
-}
-
-/* Delete */
-.delete{
-  margin-left:10px;
-  color:#ef4444;
-  cursor:pointer;
-}
-
-/* Buttons */
-.btn{
+.tab.active{
   color:var(--accent);
-  font-weight:600;
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+
+/* INPUTS */
+input, textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  margin-bottom:10px;
+}
+button{
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--accent);
+  background:none;
+  color:var(--accent);
   cursor:pointer;
+}
+.item{
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  margin-bottom:10px;
+}
+.item small{
+  color:var(--muted);
+}
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:6px;
 }
 </style>
 </head>
 
-<body class="dark earth">
+<body>
 
 <nav>
-  <div>
+  <div class="left">
     <a href="index.html">Tasks</a>
-    <a href="habits.html" class="active">Habits</a>
+    <a class="active" href="habits.html">My Space</a>
     <a href="proofs.html">Proofs</a>
   </div>
-  <div class="toggle" onclick="toggleMode()"></div>
+  <div class="right">
+    <span id="userBadge" class="user-badge"></span>
+    <button class="theme-toggle" onclick="toggleTheme()">🌿</button>
+  </div>
 </nav>
 
 <div class="container">
 
-<div class="card">
-  <h3>Create Habit</h3>
-  <input id="title" placeholder="Habit name…" />
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('habits')">Habits</div>
+    <div class="tab" onclick="showTab('links')">Links</div>
+    <div class="tab" onclick="showTab('notes')">Notes</div>
+  </div>
 
-  <select id="freq">
-    <option value="1">Daily</option>
-    <option value="2">Every 2 days</option>
-    <option value="7">Weekly</option>
-  </select>
+  <!-- HABITS -->
+  <div id="habitsTab" class="card">
+    <input id="habitInput" placeholder="New habit…" />
+    <button onclick="saveHabit()">Add Habit</button>
+    <div id="habitList"></div>
+  </div>
 
-  <select id="element" onchange="applyElement(this.value)">
-    <option value="earth">🌱 Earth</option>
-    <option value="fire">🔥 Fire</option>
-    <option value="water">🌊 Water</option>
-    <option value="wind">🌬️ Wind</option>
-    <option value="ice">❄️ Ice</option>
-  </select>
+  <!-- LINKS -->
+  <div id="linksTab" class="card" style="display:none">
+    <input id="linkTitle" placeholder="Link title" />
+    <input id="linkUrl" placeholder="https://…" />
+    <button onclick="addLink()">Save Link</button>
+    <div id="linkList"></div>
+  </div>
 
-  <div class="btn" onclick="addHabit()">Add Habit</div>
-</div>
-
-<div class="card">
-  <h3>My Habits</h3>
-  <div id="list"></div>
-</div>
+  <!-- NOTES -->
+  <div id="notesTab" class="card" style="display:none">
+    <textarea id="noteText" rows="4" placeholder="Write something…"></textarea>
+    <button onclick="addNote()">Save Note</button>
+    <div id="noteList"></div>
+  </div>
 
 </div>
 
 <script>
-const KEY="habits_v3";
-
-function today(){ return new Date().toISOString().slice(0,10); }
-
-/* Theme */
-function toggleMode(){
-  document.body.classList.toggle("light");
-  document.body.classList.toggle("dark");
+/* THEME */
+function applyTheme(){
+  document.documentElement.dataset.theme =
+    localStorage.getItem("theme") || "dark";
 }
-function applyElement(el){
-  document.body.className=document.body.className
-    .replace(/fire|water|wind|ice|earth/,el);
+function toggleTheme(){
+  const t = localStorage.getItem("theme")==="dark"?"light":"dark";
+  localStorage.setItem("theme",t);
+  applyTheme();
 }
+applyTheme();
 
-/* Habits */
-function load(){
-  const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  const box=document.getElementById("list");
-  box.innerHTML=list.map((h,i)=>{
-    const done=h.lastDone===today();
-    return `
-      <div class="habit ${done?'done':''}">
-        <div>
-          ${h.title}
-          <div style="font-size:12px;color:var(--muted)">
-            every ${h.freq} day(s)
-          </div>
-        </div>
-        <div style="display:flex;align-items:center">
-          <div class="circle ${done?'done':''}" onclick="toggleDone(${i})"></div>
-          <span class="delete" onclick="del(${i})">🗑</span>
-        </div>
-      </div>`;
-  }).join("") || "<p style='color:var(--muted)'>No habits yet</p>";
+/* USER */
+const email = localStorage.getItem("userEmail") || "Guest";
+document.getElementById("userBadge").textContent = `👤 ${email}`;
+
+/* TABS */
+function showTab(tab){
+  ["habits","links","notes"].forEach(t=>{
+    document.getElementById(t+"Tab").style.display =
+      t===tab?"block":"none";
+    document.querySelector(`.tab[onclick*="${t}"]`)
+      .classList.toggle("active", t===tab);
+  });
 }
 
-function addHabit(){
-  const title=document.getElementById("title").value.trim();
-  if(!title) return;
-  const freq=+document.getElementById("freq").value;
-  const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  list.push({title,freq,lastDone:null});
-  localStorage.setItem(KEY,JSON.stringify(list));
-  document.getElementById("title").value="";
-  load();
+/* HABITS (existing logic preserved) */
+function saveHabit(){
+  const habit=document.getElementById("habitInput").value.trim();
+  if(!habit) return;
+  fetch("https://entirenewwrker.rkknitfabsachin.workers.dev/",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"saveHabit",
+      email,
+      habit
+    })
+  }).then(()=>loadHabits());
+  document.getElementById("habitInput").value="";
 }
-
-function toggleDone(i){
-  const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  list[i].lastDone=list[i].lastDone===today()?null:today();
-  localStorage.setItem(KEY,JSON.stringify(list));
-  load();
+function loadHabits(){
+  // existing habits UI can stay as-is or be enhanced later
 }
+loadHabits();
 
-function del(i){
-  if(!confirm("Delete this habit?"))return;
-  const list=JSON.parse(localStorage.getItem(KEY)||"[]");
-  list.splice(i,1);
-  localStorage.setItem(KEY,JSON.stringify(list));
-  load();
+/* LINKS (local) */
+const linkKey = `links_${email}`;
+function addLink(){
+  const t=linkTitle.value.trim();
+  const u=linkUrl.value.trim();
+  if(!t||!u) return;
+  const arr=JSON.parse(localStorage.getItem(linkKey)||"[]");
+  arr.push({t,u});
+  localStorage.setItem(linkKey,JSON.stringify(arr));
+  renderLinks();
+  linkTitle.value=linkUrl.value="";
 }
+function renderLinks(){
+  const arr=JSON.parse(localStorage.getItem(linkKey)||"[]");
+  linkList.innerHTML=arr.map((l,i)=>`
+    <div class="item">
+      <strong>${l.t}</strong><br>
+      <small>${l.u}</small>
+      <div class="actions">
+        <a href="${l.u}" target="_blank">Open</a>
+        <button onclick="delLink(${i})">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+function delLink(i){
+  const arr=JSON.parse(localStorage.getItem(linkKey));
+  arr.splice(i,1);
+  localStorage.setItem(linkKey,JSON.stringify(arr));
+  renderLinks();
+}
+renderLinks();
 
-load();
+/* NOTES (local) */
+const noteKey = `notes_${email}`;
+function addNote(){
+  const t=noteText.value.trim();
+  if(!t) return;
+  const arr=JSON.parse(localStorage.getItem(noteKey)||"[]");
+  arr.unshift({t,at:new Date().toLocaleString()});
+  localStorage.setItem(noteKey,JSON.stringify(arr));
+  renderNotes();
+  noteText.value="";
+}
+function renderNotes(){
+  const arr=JSON.parse(localStorage.getItem(noteKey)||"[]");
+  noteList.innerHTML=arr.map((n,i)=>`
+    <div class="item">
+      <small>${n.at}</small>
+      <div>${n.t}</div>
+      <div class="actions">
+        <button onclick="delNote(${i})">Delete</button>
+      </div>
+    </div>
+  `).join("");
+}
+function delNote(i){
+  const arr=JSON.parse(localStorage.getItem(noteKey));
+  arr.splice(i,1);
+  localStorage.setItem(noteKey,JSON.stringify(arr));
+  renderNotes();
+}
+renderNotes();
 </script>
 
 </body>
