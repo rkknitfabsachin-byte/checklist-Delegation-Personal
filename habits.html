@@ -36,7 +36,7 @@ body{
   margin:0;
   font-family:Inter,system-ui;
   background:
-    radial-gradient(1200px 600px at top, var(--bg-soft), transparent),
+    radial-gradient(1200px 600px at top,var(--bg-soft),transparent),
     var(--bg);
   color:var(--text);
 }
@@ -50,13 +50,10 @@ nav{
   border-bottom:1px solid var(--border);
   backdrop-filter:blur(14px);
 }
-nav .left{
-  display:flex;
-  gap:18px;
-}
 nav a{
   text-decoration:none;
   color:var(--muted);
+  margin-right:16px;
 }
 nav a.active{
   color:var(--text);
@@ -103,10 +100,9 @@ nav .right{
 }
 .tab{
   flex:1;
+  text-align:center;
   padding:10px;
   border-radius:999px;
-  text-align:center;
-  font-size:14px;
   border:1px solid var(--border);
   cursor:pointer;
   color:var(--muted);
@@ -117,8 +113,8 @@ nav .right{
   background:var(--accent-soft);
 }
 
-/* INPUTS */
-input, textarea{
+/* COMMON */
+input, textarea, select{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
@@ -128,7 +124,7 @@ input, textarea{
   margin-bottom:10px;
 }
 button{
-  padding:10px 14px;
+  padding:8px 14px;
   border-radius:999px;
   border:1px solid var(--accent);
   background:none;
@@ -136,9 +132,9 @@ button{
   cursor:pointer;
 }
 .item{
-  padding:12px;
-  border-radius:14px;
   border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
   margin-bottom:10px;
 }
 .item small{
@@ -155,7 +151,7 @@ button{
 <body>
 
 <nav>
-  <div class="left">
+  <div>
     <a href="index.html">Tasks</a>
     <a class="active" href="habits.html">My Space</a>
     <a href="proofs.html">Proofs</a>
@@ -176,21 +172,30 @@ button{
 
   <!-- HABITS -->
   <div id="habitsTab" class="card">
-    <input id="habitInput" placeholder="New habit…" />
-    <button onclick="saveHabit()">Add Habit</button>
+    <h3>Add Habit</h3>
+    <input id="habitText" placeholder="Habit name">
+    <select id="habitFreq">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+    </select>
+    <button onclick="addHabit()">Save Habit</button>
+
+    <h3 style="margin-top:16px">Today’s Habits</h3>
     <div id="habitList"></div>
   </div>
 
   <!-- LINKS -->
   <div id="linksTab" class="card" style="display:none">
-    <input id="linkTitle" placeholder="Link title" />
-    <input id="linkUrl" placeholder="https://…" />
+    <h3>Saved Links</h3>
+    <input id="linkTitle" placeholder="Title">
+    <input id="linkUrl" placeholder="https://">
     <button onclick="addLink()">Save Link</button>
     <div id="linkList"></div>
   </div>
 
   <!-- NOTES -->
   <div id="notesTab" class="card" style="display:none">
+    <h3>Notes</h3>
     <textarea id="noteText" rows="4" placeholder="Write something…"></textarea>
     <button onclick="addNote()">Save Note</button>
     <div id="noteList"></div>
@@ -225,27 +230,68 @@ function showTab(tab){
   });
 }
 
-/* HABITS (existing logic preserved) */
-function saveHabit(){
-  const habit=document.getElementById("habitInput").value.trim();
-  if(!habit) return;
-  fetch("https://entirenewwrker.rkknitfabsachin.workers.dev/",{
+/* ===== HABITS (BACKEND) ===== */
+const WORKER="https://entirenewwrker.rkknitfabsachin.workers.dev/";
+
+function addHabit(){
+  const h = habitText.value.trim();
+  if(!h) return;
+
+  fetch(WORKER,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
       action:"saveHabit",
       email,
-      habit
+      habit:h,
+      frequency:habitFreq.value
     })
-  }).then(()=>loadHabits());
-  document.getElementById("habitInput").value="";
+  }).then(loadHabits);
+
+  habitText.value="";
 }
+
 function loadHabits(){
-  // existing habits UI can stay as-is or be enhanced later
+  fetch(WORKER,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"getTodayHabits",
+      email
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    habitList.innerHTML = res.habits.length
+      ? res.habits.map(h=>`
+        <div class="item">
+          <strong>${h.habit}</strong>
+          <small>${h.frequency}</small>
+          <div class="actions">
+            <button onclick="markHabitDone('${h.habit}')">Done</button>
+          </div>
+        </div>
+      `).join("")
+      : "<div class='item'>No habits due today 🌱</div>";
+  });
 }
+
+function markHabitDone(habit){
+  fetch(WORKER,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"saveHabit",
+      email,
+      habit,
+      status:"Done"
+    })
+  }).then(loadHabits);
+}
+
 loadHabits();
 
-/* LINKS (local) */
+/* ===== LINKS (LOCAL) ===== */
 const linkKey = `links_${email}`;
 function addLink(){
   const t=linkTitle.value.trim();
@@ -261,7 +307,7 @@ function renderLinks(){
   const arr=JSON.parse(localStorage.getItem(linkKey)||"[]");
   linkList.innerHTML=arr.map((l,i)=>`
     <div class="item">
-      <strong>${l.t}</strong><br>
+      <strong>${l.t}</strong>
       <small>${l.u}</small>
       <div class="actions">
         <a href="${l.u}" target="_blank">Open</a>
@@ -278,7 +324,7 @@ function delLink(i){
 }
 renderLinks();
 
-/* NOTES (local) */
+/* ===== NOTES (LOCAL) ===== */
 const noteKey = `notes_${email}`;
 function addNote(){
   const t=noteText.value.trim();
